@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>우주의 자로 팽창률 재기 · 우주 리서치 실습 10</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&family=Noto+Serif+KR:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>:root{--ch:#3B4380;--ch-tint:#E3E5EF}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ch:#9AA6E0;--ch-tint:#23273A}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../index.html">우주 리서치 · 실습</a><span class="chap">10장 우주의 자</span></div></header>
+<main class="wrap">
+
+<div class="hero">
+ <div class="kick">직접 해보기 08</div>
+ <h1>우주의 자로 팽창률 재기</h1>
+ <div class="meta">약 25분 · 브라우저에서 코드 없이 · Python 선택</div>
+ <p class="lede">DESI 연구진이 공개한 거리비 13개를 연다. 은하 13개의 거리가 아니다. 1,400만 개 넘는 은하와 퀘이사를 분석해 일곱 시대의 거리를 자의 길이(rd)로 나눈 값으로 줄인 것이다. 자의 길이와 우주 모형을 직접 바꿔 보며, 무엇이 자료에서 나오고 무엇이 내가 정한 가정인지 가른다.</p>
+</div>
+
+<section>
+ <h2><span class="n">1</span>출처부터 확인한다</h2>
+ <p class="sub">그래프보다 먼저 읽어야 할 것: 이 자료는 어디서, 무엇으로, 어떻게 만들어졌는가.</p>
+ <table class="prov">
+  <tr><td>자료</td><td>DESI Collaboration (2025). DESI DR2 Results II: BAO 측정과 우주론 제한. Phys. Rev. D 112, 083515 · <a href="https://doi.org/10.1103/tr6y-kpc6">doi:10.1103/tr6y-kpc6</a> · 거리비와 공분산은 <a href="https://github.com/CobayaSampler/bao_data">CobayaSampler/bao_data</a> 커밋 b7b8a36 · CC BY 4.0</td></tr>
+  <tr><td>무엇을 쟀나</td><td>일곱 적색편이 구간(0.295–2.33)에서 은하 분포에 남은 ‘소리 자’를 옆 방향(DM)과 시선 방향(DH), 또는 두 방향을 합친 값(DV)으로 읽고 자의 길이 rd로 나눈 13개 비율. 단위가 없는 비율이다.</td></tr>
+  <tr><td>이 페이지의 처리</td><td>mean.txt와 cov.txt는 원본 그대로다. bao.csv는 같은 값에 cov.txt 대각 원소의 제곱근(sigma)을 붙인 것이다. 모형은 평탄한 우주의 교육용 계산이며 연구진의 최적 모형이 아니다.</td></tr>
+  <tr><td>파일 지문</td><td class="mono" id="hashes">—</td></tr>
+ </table>
+</section>
+
+<section>
+ <h2><span class="n">2</span>자료와 모형을 직접 맞춰 본다</h2>
+ <p class="sub">자의 길이 rd, 오늘의 팽창률 H₀, 물질의 비율 Ωm을 바꾼다. 점은 관측, 곡선은 모형이다. χ²는 13×13 공분산 전체로 계산한다.</p>
+ <div class="controls">
+  <div class="ctl"><label for="rd">자의 길이 rd = <span class="val" id="rdv">147</span> Mpc</label><input type="range" id="rd" min="130" max="160" step="0.5" value="147"></div>
+  <div class="ctl"><label for="h0">H₀ = <span class="val" id="h0v">68.0</span> km/s/Mpc</label><input type="range" id="h0" min="60" max="80" step="0.1" value="68"></div>
+  <div class="ctl"><label for="om">Ωm = <span class="val" id="omv">0.30</span></label><input type="range" id="om" min="0.20" max="0.45" step="0.01" value="0.30"></div>
+  <div class="ctl"><label>바로 가기</label><div class="seg" id="pre"><button data-p="68,147,.3" class="on">처음 (68 · 147 · 0.30)</button><button data-p="71.4,140,.3">71.4 · 140</button><button data-p="68,147,.35">Ωm 0.35</button></div></div>
+ </div>
+ <p class="note" id="prod" style="margin-top:6px"></p>
+ <div class="plot" id="plotA"></div>
+ <p class="caption">① 13개 거리비(점)와 오차 막대(공분산 대각 원소의 제곱근), 현재 조건의 모형 곡선. 막대의 색: 청록 DM/rd, 주황 DH/rd, 검정 DV/rd.</p>
+ <div class="plot" id="plotB"></div>
+ <p class="caption">② DH/rd 여섯 점을 현재 rd로 H(z)로 바꾼 값(점)과 현재 H₀·Ωm의 곡선 H₀·E(z). 오차 막대는 rd를 고정하고 대각 원소만 옮긴 근사다.</p>
+ <table class="res" id="sum"></table>
+ <div style="overflow-x:auto"><table class="res" id="rowsT" style="margin-top:14px"></table></div>
+</section>
+
+<section>
+ <h2><span class="n">3</span>해 볼 일</h2>
+ <ol class="steps">
+  <li><span><b>줄부터 확인한다.</b> 아래 표에서 z=0.510의 두 줄(DM/rd 13.588, DH/rd 21.863)을 찾는다. 각각 그림 ①의 어느 점인가?</span></li>
+  <li><span><b>비율을 팽창률로 바꾼다.</b> DH는 빛의 속도를 H로 나눈 값이다. H(z) = 299,792.458 ÷ (DH/rd × rd). rd=147을 넣으면 얼마인가? (표의 ‘H(0.51)’ 칸과 손 계산을 비교한다.)</span></li>
+  <li><span><b>자의 길이만 바꾼다.</b> rd를 140으로 옮겨 본다. 같은 비율에서 H(z)는 어떻게 되는가? 관측값 자체는 바뀌었는가?</span></li>
+  <li><span><b>같은 곱, 다른 조건.</b> H₀=71.4, rd=140으로 놓는다(바로 가기). 두 수의 곱은 9,996으로 처음과 같다. 곡선과 χ²는 어떻게 되는가? Ωm만 0.35로 바꾸면?</span></li>
+  <li><span><b>기록한다.</b> 표에서 읽은 값, 내가 정한 조건, 바뀐 결과, 남은 가정을 나누어 6절의 연구 노트에 적는다. 파일 지문도 함께 남긴다.</span></li>
+ </ol>
+</section>
+
+<section>
+ <h2><span class="n">4</span>예상 결과와 비교한다</h2>
+ <p class="sub">책 10장 오른쪽 쪽의 숫자다. 위 조작판의 현재 조건으로 계산한 값을 책의 처음 조건 값과 견준다. 조건을 바꿨다면 달라지는 것이 정상이다. 무엇이 달라졌는지가 이 실습의 핵심이다.</p>
+ <div class="expect">
+  <h3>자를 바꾸면 팽창률은 바뀌지만 어긋남은 그대로다</h3>
+  <div id="cmp"></div>
+  <p class="note">비교 조건(처음): rd=147, H₀=68, Ωm=0.30. 아래 세 줄은 현재 조작과 상관없이 책의 다른 조건(rd=140 / H₀=71.4·rd=140 / Ωm=0.35)으로 이 페이지의 계산이 책의 숫자를 내는지 확인한다.</p>
+ </div>
+ <ul class="note" style="margin-top:14px">
+  <li>관측된 비율 21.863은 그대로이고, 바뀐 것은 내가 정한 자의 길이다. 단위가 붙은 팽창률을 말하려면 rd를 따로 알아야 한다. 93.3은 적색편이 0.51 시대의 팽창률이지 오늘의 허블 상수가 아니다.</li>
+  <li>H₀와 rd를 같은 곱으로 바꾸면 예측이 하나도 달라지지 않는다. BAO만으로는 두 값을 따로 정할 수 없다는 뜻이다. 반면 Ωm은 시대별 모양을 바꿔 χ²가 크게 변한다. χ²는 이 계산 조건에서의 어긋남 요약일 뿐, 모형이 참일 확률이 아니다.</li>
+ </ul>
+ <h3 style="margin-top:22px;font-size:15px">결과가 다르다면</h3>
+ <ul class="note">
+  <li>H(z)가 조금 다르면 빛의 속도를 km/s 단위(299,792.458)로 썼는지, DM 줄과 바꿔 읽지 않았는지 본다.</li>
+  <li>χ²가 다르면 13×13 공분산 전체를 썼는지, 파일 지문이 9ac154ab…(mean)와 252a1432…(cov)로 시작하는지 확인한다.</li>
+ </ul>
+</section>
+
+<section>
+ <h2><span class="n">5</span>같은 계산을 코드로</h2>
+ <p class="sub">표준 라이브러리만 쓰므로 Python 3만 있으면 된다.</p>
+<pre>python3 analysis.py                              # 처음 조건 H0=68, rd=147, Ωm=0.30
+python3 analysis.py --check                      # 책의 예상 결과와 비교
+python3 analysis.py --h0 71.4 --rd 140           # 같은 곱, 다른 조건
+python3 analysis.py --om 0.35                    # Ωm만 바꾸기
+python3 analysis.py --scan-om                    # Ωm을 0.25–0.35에서 훑기</pre>
+ <div class="files">
+  <a href="analysis.py" download><b>analysis.py</b><span>같은 계산 · 표준 라이브러리</span></a>
+  <a href="notebook.ipynb" download><b>notebook.ipynb</b><span>그림과 함께 따라 하기</span></a>
+  <a href="expected.json" download><b>expected.json</b><span>책의 예상 결과</span></a>
+  <a href="data/bao.csv" download><b>data/bao.csv</b><span>13개 거리비 · sigma</span></a>
+  <a href="data/mean.txt" download><b>data/mean.txt</b><span>원본 값</span></a>
+  <a href="data/cov.txt" download><b>data/cov.txt</b><span>13×13 공분산 원본</span></a>
+  <a href="data/provenance.json" download><b>data/provenance.json</b><span>출처·처리·감사문</span></a>
+ </div>
+</section>
+
+<section>
+ <h2><span class="n">6</span>연구 노트</h2>
+ <p class="sub">질문은 좁게, 선택과 결과는 따로. 다른 사람이 똑같이 다시 할 수 있게 적는다.</p>
+ <div id="note"></div>
+</section>
+
+<section>
+ <h2>다음 걸음</h2>
+ <p>Ωm을 0.25에서 0.35까지 조금씩 바꾸며 χ²가 가장 작아지는 곳을 찾아 기록해 보자(<span class="mono">--scan-om</span>). 그 값을 연구진의 결과와 비교하기 전에, 내 계산에서 빠진 것(공간의 휘어짐, 변하는 암흑에너지, 우주배경복사와 초신성)을 먼저 적는다.</p>
+</section>
+</main>
+<footer><div class="wrap">《우주 리서치》 10장 「우주의 자」의 실습 · 자료: DESI DR2, CC BY 4.0. This research used data obtained with the Dark Energy Spectroscopic Instrument (DESI); 전체 감사문은 data/provenance.json.</div></footer>
+
+<script src="../assets/lab.js"></script>
+<script>
+const C = 299792.458;
+const E = (z,om)=>Math.sqrt(om*(1+z)**3+1-om);
+function integ(z,om,n=400){ if(z<=0) return 0; const h=z/n; let s=0; for(let i=0;i<=n;i++) s+=(i===0||i===n?1:i%2?4:2)/E(i*h,om); return h/3*s; }
+function model(q,z,om,h0,rd){ const s=C/(h0*rd), dm=s*integ(z,om), dh=s/E(z,om);
+  return q==="DM_over_rs"?dm : q==="DH_over_rs"?dh : Math.cbrt(z*dm*dm*dh); }
+function solve(a,b){ const n=b.length, m=a.map((r,i)=>[...r,b[i]]);
+  for(let i=0;i<n;i++){ let p=i; for(let r=i+1;r<n;r++) if(Math.abs(m[r][i])>Math.abs(m[p][i])) p=r; [m[i],m[p]]=[m[p],m[i]];
+    for(let r=i+1;r<n;r++){ const f=m[r][i]/m[i][i]; for(let c=i;c<=n;c++) m[r][c]-=f*m[i][c]; } }
+  const x=Array(n).fill(0); for(let i=n-1;i>=0;i--){ let s=m[i][n]; for(let c=i+1;c<n;c++) s-=m[i][c]*x[c]; x[i]=s/m[i][i]; } return x; }
+let rows=[], cov=[];
+const chi2 = (om,h0,rd)=>{ const d=rows.map(r=>r.v-model(r.q,r.z,om,h0,rd)); return solve(cov,d).reduce((s,x,i)=>s+x*d[i],0); };
+const Hat = (r,rd)=>({h:C/(r.v*rd), e:C/(r.v*rd)*r.s/r.v});
+const state = {rd:147, h0:68, om:0.30};
+const COL = {DM_over_rs:"#2E8C86", DH_over_rs:"#D9733D", DV_over_rs:"#222"};
+const QN = {DM_over_rs:"DM/rd", DH_over_rs:"DH/rd", DV_over_rs:"DV/rd"};
+
+async function sha8(url){
+  const buf = await (await fetch(url)).arrayBuffer();
+  if (!crypto.subtle) return "—";
+  const h = await crypto.subtle.digest("SHA-256", buf);
+  return [...new Uint8Array(h)].slice(0,4).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function draw(){
+  const {rd,h0,om} = state;
+  document.querySelector("#rdv").textContent = Lab.fmt(rd,1);
+  document.querySelector("#h0v").textContent = Lab.fmt(h0,1);
+  document.querySelector("#omv").textContent = Lab.fmt(om,2);
+  document.querySelector("#prod").innerHTML = `H₀ × rd = <b>${Lab.fmt(h0*rd,0)}</b> (처음 조건은 9,996). BAO 거리비는 이 곱과 Ωm에만 반응한다.`;
+  const zs = Array.from({length:125},(_,i)=>0.02+i*0.02);
+  const ser = [];
+  for (const q of Object.keys(COL)) ser.push({x:zs, y:zs.map(z=>model(q,z,om,h0,rd)), color:COL[q], width:1.3, dash:q==="DH_over_rs"?"5 3":q==="DV_over_rs"?"1 3":"", label:QN[q]});
+  for (const r of rows) ser.push({x:[r.z,r.z], y:[r.v-r.s,r.v+r.s], color:COL[r.q], width:1.6});
+  for (const q of Object.keys(COL)) { const p=rows.filter(r=>r.q===q); ser.push({type:"dots", x:p.map(r=>r.z), y:p.map(r=>r.v), color:COL[q], r:4, opacity:1}); }
+  Lab.plot("#plotA", {series:ser, xmin:0, xmax:2.5, ymin:0, ymax:45, xlabel:"적색편이 z", ylabel:"거리 ÷ rd (단위 없음)"});
+  const dh = rows.filter(r=>r.q==="DH_over_rs");
+  const hz = dh.map(r=>({z:r.z, ...Hat(r,rd)}));
+  const sB = [{x:zs.concat([0]).sort((a,b)=>a-b), y:zs.concat([0]).sort((a,b)=>a-b).map(z=>h0*E(z,om)), color:"#222", width:1.3, label:"H₀·E(z)"}];
+  hz.forEach(p=>sB.push({x:[p.z,p.z], y:[p.h-p.e,p.h+p.e], color:"#3B4380", width:1.6}));
+  sB.push({type:"dots", x:hz.map(p=>p.z), y:hz.map(p=>p.h), color:"#3B4380", r:4, opacity:1, label:`rd=${Lab.fmt(rd,1)}로 환산한 점`});
+  Lab.plot("#plotB", {series:sB, xmin:0, xmax:2.5, ymin:0, ymax:260, xlabel:"적색편이 z", ylabel:"H(z)  km/s/Mpc"});
+  const p51 = hz.find(p=>Math.abs(p.z-0.51)<1e-9), c2 = chi2(om,h0,rd);
+  document.querySelector("#sum").innerHTML =
+    `<tr><th>항목</th><th>값</th></tr>
+     <tr><td>z=0.510 DH/rd (관측)</td><td class="num">${Lab.fmt(dh[0].v,3)}</td></tr>
+     <tr><td>H(0.51) = c ÷ (DH/rd × rd)</td><td class="num">${Lab.fmt(p51.h,1)} ± ${Lab.fmt(p51.e,1)} km/s/Mpc</td></tr>
+     <tr><td>모형 H₀·E(0.51)</td><td class="num">${Lab.fmt(h0*E(0.51,om),1)} km/s/Mpc</td></tr>
+     <tr><td>13개 전체 χ² (공분산 전체)</td><td class="num">${Lab.fmt(c2,1)}</td></tr>`;
+  document.querySelector("#rowsT").innerHTML =
+    `<tr><th>#</th><th>z</th><th>양</th><th>관측</th><th>± 오차</th><th>모형</th><th>(관측−모형)/오차</th></tr>` +
+    rows.map((r,i)=>{ const m=model(r.q,r.z,om,h0,rd); return `<tr><td>${i}</td><td class="num">${Lab.fmt(r.z,3)}</td><td>${QN[r.q]}</td><td class="num">${Lab.fmt(r.v,3)}</td><td class="num">${Lab.fmt(r.s,3)}</td><td class="num">${Lab.fmt(m,3)}</td><td class="num">${Lab.fmt((r.v-m)/r.s,1)}</td>`; }).join("");
+  const hb = Hat(dh[0],147).h, hb2 = Hat(dh[0],140);
+  Lab.compare("#cmp", [
+    {label:"H(0.51), km/s/Mpc · 현재 rd", mine:p51.h, expected:93.3, tol:.05, digits:1},
+    {label:"H(0.51) 오차 · 현재 rd", mine:p51.e, expected:1.8, tol:.05, digits:1},
+    {label:"13개 전체 χ² · 현재 조건", mine:c2, expected:35.2, tol:.05, digits:1},
+    {label:"H(0.51), rd=140으로 계산", mine:hb2.h, expected:97.9, tol:.05, digits:1},
+    {label:"χ², H₀=71.4 · rd=140 · Ωm=0.30으로 계산", mine:chi2(.3,71.4,140), expected:35.2, tol:.05, digits:1},
+    {label:"χ², H₀=68 · rd=147 · Ωm=0.35로 계산", mine:chi2(.35,68,147), expected:106.2, tol:.05, digits:1}
+  ]);
+}
+function bind(id,key){ const el=document.querySelector("#"+id); el.oninput=()=>{ state[key]=+el.value; clearOn(); draw(); }; }
+function clearOn(){ document.querySelectorAll("#pre button").forEach(x=>x.classList.remove("on")); }
+(async()=>{
+  const raw = await Lab.csv("data/bao.csv");
+  rows = raw.map(r=>({z:+r.z, v:+r.value, q:r.quantity, s:+r.sigma}));
+  const txt = await (await fetch("data/cov.txt")).text();
+  cov = txt.split("\n").filter(l=>l.trim()).map(l=>l.trim().split(/\s+/).map(Number));
+  bind("rd","rd"); bind("h0","h0"); bind("om","om");
+  document.querySelectorAll("#pre button").forEach(b=>b.onclick=()=>{
+    const [h0,rd,om] = b.dataset.p.split(",").map(Number); Object.assign(state,{h0,rd,om});
+    document.querySelector("#rd").value=rd; document.querySelector("#h0").value=h0; document.querySelector("#om").value=om;
+    clearOn(); b.classList.add("on"); draw(); });
+  draw();
+  const names = ["mean.txt","cov.txt","bao.csv"];
+  const hs = await Promise.all(names.map(n=>sha8("data/"+n)));
+  document.querySelector("#hashes").textContent = names.map((n,i)=>`${n} ${hs[i]}`).join(" · ");
+  Lab.notebook("#note", "lab10", Lab.NOTE("자의 길이 rd를 바꾸면 H(z)와 χ²는 각각 어떻게 달라지나? H₀와 Ωm은?"));
+})();
+</script>
+</body>
+</html>

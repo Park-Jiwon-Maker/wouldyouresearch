@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>달의 두 얼굴, 지각 두께로 비교하기 · 우주 리서치 실습 02</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&family=Noto+Serif+KR:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>:root{--ch:#A88A5A;--ch-tint:#F3EEE6}</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../index.html">우주 리서치 · 실습</a><span class="chap">2장 돌의 기억</span></div></header>
+<main class="wrap">
+
+<div class="hero">
+ <div class="kick">직접 해보기 02</div>
+ <h1>달의 두 얼굴, 지각 두께로 비교하기</h1>
+ <div class="meta">약 25분 · 브라우저에서 코드 없이 · Python 선택</div>
+ <p class="lede">GRAIL의 중력 자료로 계산한 공개 지각 두께 모형을 연다. 카메라 사진도, 중력을 직접 잰 값도 아니다. 지형과 암석 밀도의 가정을 더해 계산한 모형의 두께를 2도 간격의 격자 16,200칸으로 옮겨 놓았다. 이 칸들을 앞면과 뒷면으로 나누어 평균을 내 보면, 한 줄짜리 문장 “뒷면 지각이 더 두껍다”가 어떤 조건에 기대고 있는지 보인다.</p>
+</div>
+
+<section>
+ <h2><span class="n">1</span>출처부터 확인한다</h2>
+ <p class="sub">그래프보다 먼저 읽어야 할 것: 이 자료는 어디서, 무엇으로, 어떻게 만들어졌는가.</p>
+ <table class="prov">
+  <tr><td>자료</td><td>Wieczorek, M. A. 외 (2013), GRAIL Crustal Thickness Archive v1. Zenodo <a href="https://doi.org/10.5281/zenodo.997347">doi:10.5281/zenodo.997347</a> (논문: <i>Science</i> 339, 671). 이용 조건은 Zenodo 기록을 따른다.</td></tr>
+  <tr><td>무엇인가</td><td>GRAIL 중력과 LOLA 지형에 밀도·다공성·아폴로 착륙지 두께 같은 가정을 더해 추정한 <b>모형</b>의 지각 두께. 원시 중력 관측값이 아니다. 모형 1(맨틀 3,220kg/m³, 전 지구 평균 약 34km)과 모형 3(3,150kg/m³, 약 43km)은 가정이 다르다.</td></tr>
+  <tr><td>이 페이지의 처리</td><td>0.25° 원본(721×1441)에서 북위 89°~남위 89°, 동경 −179°~+179°의 2° 간격 칸 중심 값을 그대로 골랐다. 보간·평활화 없음. 칸 수 90×180=16,200.</td></tr>
+  <tr><td>파일 지문</td><td class="mono" id="hashes">—</td></tr>
+ </table>
+</section>
+
+<section>
+ <h2><span class="n">2</span>두 면을 직접 나누어 본다</h2>
+ <p class="sub">모형, 위도 범위, 평균 방법을 바꾼다. 색 띠는 앞면(경도 −90°~+90°)이다. 이 경계는 비교를 위한 약속이다.</p>
+ <div class="controls">
+  <div class="ctl"><label for="model">모형</label>
+   <select id="model">
+    <option value="1">모형 1 (맨틀 3,220kg/m³)</option>
+    <option value="3">모형 3 (맨틀 3,150kg/m³)</option>
+   </select></div>
+  <div class="ctl"><label for="lat">위도 범위</label>
+   <select id="lat">
+    <option value="90">전체 (±90°)</option>
+    <option value="60">±60°</option>
+    <option value="30">±30°</option>
+    <option value="15">±15°</option>
+   </select></div>
+  <div class="ctl"><label>평균 방법</label><div class="seg" id="wt"><button data-w="1" class="on">넓이 가중 (cos 위도)</button><button data-w="0">칸마다 같은 무게</button></div></div>
+ </div>
+ <div class="plot" id="plot"></div>
+ <p class="caption" id="cap"></p>
+ <table class="res" id="tab"></table>
+</section>
+
+<section>
+ <h2><span class="n">3</span>해 볼 일</h2>
+ <ol class="steps">
+  <li><span><b>출처부터 확인한다.</b> 이 지도는 사진인가, 관측값인가, 모형인가? 어떤 가정이 들어갔는가?</span></li>
+  <li><span><b>두 면을 나눈다.</b> 경도 −90°~+90°를 앞면, 나머지를 뒷면으로 정한다. 실제 달은 조금씩 흔들려 보이므로, 이것은 비교를 위한 약속이다.</span></li>
+  <li><span><b>넓이를 맞춰 평균한다.</b> 극에 가까운 칸은 실제 넓이가 작다. 각 칸에 위도의 코사인을 곱해 평균한다. ‘칸마다 같은 무게’로 바꾸면 값이 얼마나 달라지는가?</span></li>
+  <li><span><b>한 번에 하나만 바꾼다.</b> 모형 1을 모형 3으로 바꿔 본다. 다음에는 모형을 돌려놓고 위도 범위만 ±30°로 좁힌다.</span></li>
+  <li><span><b>스스로 묻는다.</b> “달 뒷면 지각은 앞면보다 8km 두껍다”고 쓰려면 문장 뒤에 무엇을 함께 적어야 할까?</span></li>
+ </ol>
+</section>
+
+<section>
+ <h2><span class="n">4</span>예상 결과와 비교한다</h2>
+ <p class="sub">책 2장 오른쪽 쪽의 숫자다. 조건을 바꿨다면 값이 달라지는 것이 정상이다. 무엇이 달라졌는지가 이 실습의 핵심이다.</p>
+ <div class="expect">
+  <h3>두 모형 모두 뒷면 평균이 더 두껍다. 그러나 차이의 크기는 조건마다 다르다</h3>
+  <div id="cmp"></div>
+  <p class="note">비교 조건: 위의 ‘평균 방법’은 현재 선택을 따르고, 앞 여섯 줄은 현재 선택한 위도 범위로, 마지막 두 줄은 위도 ±30°로 계산한다. 책의 값은 전 위도(±90°) · 넓이 가중 평균이다.</p>
+  <p class="note" id="thin"></p>
+ </div>
+ <h3 style="margin-top:22px;font-size:15px">읽는 법</h3>
+ <ul class="note">
+  <li>두 모형은 밀도 등의 가정이 달라 평균이 8km 넘게 다르지만, ‘뒷면 평균이 더 두껍다’는 방향은 남는다. 같은 중력 자료에서 나온 모형이므로 독립된 두 관측의 일치로 세지는 않는다.</li>
+  <li>평균은 지역 차이를 가린다. 모형 1에서 뒷면 넓이의 약 21%는 앞면 평균보다 얇고, 그 상당 부분이 남극–에이트켄 분지 일대다. ‘뒷면은 어디나 더 두껍다’고 말할 수 없다.</li>
+ </ul>
+ <h3 style="margin-top:22px;font-size:15px">결과가 다르다면</h3>
+ <ul class="note">
+  <li>7.93km가 나오지 않으면 넓이 가중치와 경도 경계(±90°)의 처리를 확인한다.</li>
+  <li>모형과 위도 범위를 동시에 바꾸지 않았는지 확인한다.</li>
+  <li>Python 결과가 화면과 다르면 파일 지문(SHA256)부터 비교한다.</li>
+ </ul>
+</section>
+
+<section>
+ <h2><span class="n">5</span>같은 계산을 코드로</h2>
+ <p class="sub">표준 라이브러리만 쓰므로 Python 3만 있으면 된다.</p>
+<pre>python3 analysis.py                  # 두 모형의 앞·뒷면 평균과 차이
+python3 analysis.py --check          # 책의 예상 결과와 비교
+python3 analysis.py --lat 30         # 위도 ±30°만
+python3 analysis.py --no-weight      # 넓이 가중치 없이 평균</pre>
+ <div class="files">
+  <a href="analysis.py" download><b>analysis.py</b><span>같은 계산 · 표준 라이브러리</span></a>
+  <a href="notebook.ipynb" download><b>notebook.ipynb</b><span>그림과 함께 따라 하기</span></a>
+  <a href="expected.json" download><b>expected.json</b><span>책의 예상 결과</span></a>
+  <a href="data/lunar_crust_2deg.csv" download><b>data/lunar_crust_2deg.csv</b><span>지각 두께 격자 · 16,200행</span></a>
+  <a href="data/provenance.json" download><b>data/provenance.json</b><span>출처·처리 기록</span></a>
+ </div>
+</section>
+
+<section>
+ <h2><span class="n">6</span>연구 노트</h2>
+ <p class="sub">질문은 좁게, 선택과 결과는 따로. 다른 사람이 똑같이 다시 할 수 있게 적는다.</p>
+ <div id="note"></div>
+</section>
+
+<section>
+ <h2>다음 걸음</h2>
+ <p>창어 6호 착륙지(남위 약 42°, 서경 약 154°) 근처 칸의 두께를 찾아 반구 평균과 비교하고, 모형·위도 범위·평균 방법을 함께 적어 두자. 표의 위도·경도는 동경이 양수이므로 서경 154°는 −154°다.</p>
+</section>
+</main>
+<footer><div class="wrap">《우주 리서치》 2장 「돌의 기억」의 실습 · 자료 이용 조건은 각 출처를 따른다.</div></footer>
+
+<script src="../assets/lab.js"></script>
+<script>
+const EXP = {
+  all: {m1:{near:30.03, far:37.96, diff:7.93}, m3:{near:38.75, far:47.24, diff:8.50}},
+  lat30: {m1:13.31, m3:14.27}
+};
+const state = {model:1, lat:90, weight:true};
+let rows = [];
+
+async function sha8(url){
+  const buf = await (await fetch(url)).arrayBuffer();
+  if (!crypto.subtle) return "—";
+  const h = await crypto.subtle.digest("SHA-256", buf);
+  return [...new Uint8Array(h)].slice(0,4).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+const near = lon => lon >= -90 && lon <= 90;
+function means(model, lat, weight){
+  const acc = {n:[0,0,0], f:[0,0,0]};
+  for (const r of rows){
+    if (Math.abs(r.la) > lat) continue;
+    const w = weight ? Math.cos(r.la*Math.PI/180) : 1;
+    const a = acc[near(r.lo) ? "n" : "f"];
+    a[0] += w*r[model===1 ? "t1" : "t3"]; a[1] += w; a[2]++;
+  }
+  const n = acc.n[0]/acc.n[1], f = acc.f[0]/acc.f[1];
+  return {near:n, far:f, diff:f-n, cells:[acc.n[2], acc.f[2]]};
+}
+function thinShare(model){
+  const nm = means(model, 90, true).near, key = model===1 ? "t1" : "t3";
+  let tot=0, thin=0;
+  for (const r of rows){ if (near(r.lo)) continue; const w=Math.cos(r.la*Math.PI/180); tot+=w; if (r[key] < nm) thin+=w; }
+  return thin/tot;
+}
+function profile(model){           // 경도마다 (위도 범위 안) 평균 두께
+  const key = model===1 ? "t1" : "t3", m = new Map();
+  for (const r of rows){
+    if (Math.abs(r.la) > state.lat) continue;
+    const w = state.weight ? Math.cos(r.la*Math.PI/180) : 1;
+    const a = m.get(r.lo) || [0,0]; a[0]+=w*r[key]; a[1]+=w; m.set(r.lo, a);
+  }
+  const ks = [...m.keys()].sort((a,b)=>a-b);
+  return {x:ks, y:ks.map(k=>m.get(k)[0]/m.get(k)[1])};
+}
+function draw(){
+  const chc = getComputedStyle(document.documentElement).getPropertyValue("--ch").trim();
+  const ink = getComputedStyle(document.documentElement).getPropertyValue("--ink").trim();
+  const grey = getComputedStyle(document.documentElement).getPropertyValue("--grey").trim();
+  const sel = state.model, oth = sel===1 ? 3 : 1;
+  const ps = profile(sel), po = profile(oth), ms = means(sel, state.lat, state.weight);
+  const all = [...ps.y, ...po.y];
+  const ymin = Math.floor(Math.min(...all)/5)*5 - 5, ymax = Math.ceil(Math.max(...all)/5)*5 + 5;
+  Lab.plot("#plot", {
+    series:[
+      {x:po.x, y:po.y, color:grey, width:1.2, dash:"5 4", label:`모형 ${oth}`},
+      {x:ps.x, y:ps.y, color:ink, width:1.8, label:`모형 ${sel} (선택)`},
+      {x:[-90,90], y:[ms.near,ms.near], color:chc, width:3.2, label:"반구 평균"},
+      {x:[-180,-90], y:[ms.far,ms.far], color:chc, width:3.2},
+      {x:[90,180], y:[ms.far,ms.far], color:chc, width:3.2}
+    ],
+    bands:[{x0:-90, x1:90, label:"앞면"}, {x0:-180, x1:-90, label:"뒷면"}, {x0:90, x1:180, label:"뒷면"}],
+    xmin:-180, xmax:180, ymin, ymax, xticks:8,
+    xlabel:"경도 (동경 +) →", ylabel:"경도별 지각 두께 (km)"
+  });
+  document.querySelector("#cap").textContent =
+    `위도 ±${state.lat}° · ${state.weight ? "cos 위도 가중 평균" : "칸마다 같은 무게"} · 선은 같은 경도의 칸들(위도 범위 안)을 평균한 값, 굵은 가로선은 반구 평균. 칸 수는 앞 ${ms.cells[0].toLocaleString("ko-KR")} · 뒤 ${ms.cells[1].toLocaleString("ko-KR")}.`;
+  let h = "<tr><th>모형</th><th>앞면 평균 (km)</th><th>뒷면 평균 (km)</th><th>뒷면 − 앞면 (km)</th></tr>";
+  for (const m of [1,3]){
+    const r = means(m, state.lat, state.weight);
+    h += `<tr${m===sel?' style="font-weight:700"':''}><td>모형 ${m}</td><td class="num">${Lab.fmt(r.near,2)}</td><td class="num">${Lab.fmt(r.far,2)}</td><td class="num">${Lab.fmt(r.diff,2)}</td></tr>`;
+  }
+  document.querySelector("#tab").innerHTML = h;
+
+  const rowsC = [];
+  for (const m of [1,3]){
+    const r = means(m, state.lat, state.weight);
+    for (const [k,lab] of [["near","앞 평균"],["far","뒤 평균"],["diff","뒤−앞 차이"]])
+      rowsC.push({label:`모형 ${m} · ${lab}`, mine:r[k], expected:EXP.all["m"+m][k], tol:.006, digits:2, unit:" km"});
+  }
+  for (const m of [1,3])
+    rowsC.push({label:`모형 ${m} · 위도 ±30° 차이`, mine:means(m, 30, state.weight).diff, expected:EXP.lat30["m"+m], tol:.006, digits:2, unit:" km"});
+  Lab.compare("#cmp", rowsC);
+  document.querySelector("#thin").textContent =
+    `참고: 모형 1에서 앞면 평균보다 얇은 뒷면 넓이의 비율은 ${Lab.fmt(thinShare(1)*100,1)}% (책: 약 21%, 전 위도·넓이 가중 기준).`;
+}
+function seg(id, fn){
+  document.querySelectorAll(`#${id} button`).forEach(b=>b.onclick=()=>{
+    document.querySelectorAll(`#${id} button`).forEach(x=>x.classList.remove("on")); b.classList.add("on"); fn(b); draw();
+  });
+}
+(async()=>{
+  const raw = await Lab.csv("data/lunar_crust_2deg.csv");
+  rows = raw.map(r=>({la:r.latitude_deg, lo:r.longitude_east_deg, t1:r.model1_km, t3:r.model3_km}));
+  document.querySelector("#model").onchange = e=>{state.model=+e.target.value; draw();};
+  document.querySelector("#lat").onchange = e=>{state.lat=+e.target.value; draw();};
+  seg("wt", b=>{state.weight = b.dataset.w==="1";});
+  draw();
+  document.querySelector("#hashes").textContent = "lunar_crust_2deg.csv " + await sha8("data/lunar_crust_2deg.csv");
+  Lab.notebook("#note", "lab02", Lab.NOTE("달 뒷면 지각은 앞면보다 두꺼운가? 모형·위도 범위·평균 방법을 바꾸면 차이는 얼마나 달라지나?"));
+})();
+</script>
+</body>
+</html>

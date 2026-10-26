@@ -1,0 +1,21 @@
+[
+  {
+    "id": "catalog.csv",
+    "source_url": "https://github.com/dalekocevski/Kocevski24",
+    "commit": "b47c1872e4a5133656eade1dbfbc52db8124a40d",
+    "paper": "Kocevski et al. (2025), The Astrophysical Journal 986, 126, doi:10.3847/1538-4357/adbc7d (저장소의 2024 표기는 사전공개 시기의 이름)",
+    "license": "저자 저장소 공개 자료. 이용 조건은 저장소와 논문을 따른다(재배포 전 확인).",
+    "sha256": "4b7f690c590629b19c4b8fd3dfc0f5a965043ed912c6c174dbb7708789cf4250",
+    "rows": 341,
+    "columns": "survey, source_id, ra, dec, zbest, zflag(0 광도, 1 분광), beta_uv, beta_uv_err, beta_opt, beta_opt_err, mag444(F444W AB 등급, 작을수록 밝음), m_uv, M_UV, id",
+    "processing": "원본 Table3.dat를 열 이름이 있는 CSV로 옮긴 것(책 제작 단계의 변환). 행을 거르거나 값을 바꾸지 않았다.",
+    "limitations": "무작위 표본이 아니다. 조사마다 면적과 깊이가 다르다. zflag는 적색편이를 잰 방법일 뿐 블랙홀 확인 여부가 아니다. 학술지 PDF Table 3은 zflag를 1=광도, 2=분광으로 표기하고 CEERS 260의 mag444도 26.13으로 다르다(저장소판 26.14). 이 실습의 값은 고정된 저장소판에 대한 것이다."
+  },
+  {
+    "id": "Kocevski24.Table3.dat",
+    "source_url": "https://github.com/dalekocevski/Kocevski24",
+    "commit": "b47c1872e4a5133656eade1dbfbc52db8124a40d",
+    "sha256": "27372eee04327a9cf830bba2a06481b765371b5e4d2deee5c08799ef613711de",
+    "processing": "원본 그대로(변경 없음). 책의 ‘파일 지문 27372eee…711de’는 이 파일의 것이다. catalog.csv는 이 파일을 CSV로 옮긴 파생본이라 지문이 다르다(4b7f690c)."
+  }
+]

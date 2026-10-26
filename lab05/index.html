@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>인산염의 지문 찾기 · 우주 리서치 실습 05</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&family=Noto+Serif+KR:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>:root{--ch:#2E8C86;--ch-tint:#E4EFED}</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../index.html">우주 리서치 · 실습</a><span class="chap">5장 얼음 아래 바다</span></div></header>
+<main class="wrap">
+
+<div class="hero">
+ <div class="kick">직접 해보기 03</div>
+ <h1>인산염의 지문 찾기</h1>
+ <div class="meta">약 20분 · 브라우저에서 코드 없이 · Python 선택</div>
+ <p class="lede">2023년 엔셀라두스의 얼음 알갱이에서 인산염을 찾아낸 연구진은, 우주에서 얻은 신호에 이름을 붙이기 전에 지구의 실험실에서 ‘이 물질이면 이런 무늬가 나온다’는 사전을 만들었다. 그 사전의 한 쪽을 연다. 카시니가 토성에서 잰 자료가 아니라, 성분을 아는 용액으로 만든 비교용 스펙트럼이다.</p>
+</div>
+
+<section>
+ <h2><span class="n">1</span>출처부터 확인한다</h2>
+ <p class="sub">그래프보다 먼저 읽어야 할 것: 이 자료는 어디서, 무엇으로, 어떻게 만들어졌는가.</p>
+ <table class="prov">
+  <tr><td>자료</td><td>Klenner, F., Postberg, F., Sekine, Y. (2023). 인산염 논문의 지상 LILBID 실험 스펙트럼. Zenodo <a href="https://doi.org/10.5281/zenodo.7703848">doi:10.5281/zenodo.7703848</a> · CC BY 4.0</td></tr>
+  <tr><td>무엇을 쟀나</td><td>성분을 아는 용액의 가는 물줄기에 레이저를 쏘아 생긴 이온의 질량 스펙트럼. 우주에서 알갱이가 부딪힐 때를 흉내 낸다.</td></tr>
+  <tr><td>이 페이지의 처리</td><td>원본 TXT(각 28,000행)에서 20 ≤ m/z ≤ 210만 고르고, 그 구간의 가장 큰 신호로 나눴다. 평활화·바탕 보정·농도 환산은 하지 않았다.</td></tr>
+  <tr><td>파일 지문</td><td class="mono" id="hashes">—</td></tr>
+ </table>
+</section>
+
+<section>
+ <h2><span class="n">2</span>스펙트럼을 직접 본다</h2>
+ <p class="sub">용액, 구간, 봉우리를 찾는 범위를 바꿔 본다. 색 띠가 명목 질량 125 · 165 · 187 근처다.</p>
+ <div class="controls">
+  <div class="ctl"><label for="sol">용액</label>
+   <select id="sol">
+    <option value="mix">Na₂HPO₄ + Na₃PO₄ 혼합액</option>
+    <option value="tri">Na₃PO₄ 0.1M (인산나트륨)</option>
+    <option value="di">Na₂HPO₄ 0.1M (인산수소나트륨)</option>
+    <option value="phosphite">인산염 + 아인산염 혼합액</option>
+   </select></div>
+  <div class="ctl"><label>구간</label><div class="seg" id="range"><button data-r="20,210" class="on">전체 20–210</button><button data-r="110,200">확대 110–200</button></div></div>
+  <div class="ctl"><label>봉우리 찾는 범위</label><div class="seg" id="win"><button data-w="1" class="on">±1</button><button data-w="2">±2</button><button data-w="3">±3</button></div></div>
+  <div class="ctl"><label><input type="checkbox" id="norm"> 구간 안에서 다시 1로 맞추기</label></div>
+ </div>
+ <div class="plot" id="plot"></div>
+ <p class="caption" id="cap"></p>
+ <table class="res" id="peaks"></table>
+</section>
+
+<section>
+ <h2><span class="n">3</span>해 볼 일</h2>
+ <ol class="steps">
+  <li><span><b>출처부터 확인한다.</b> 이 그래프는 토성에서 잰 것인가, 지구의 실험실에서 잰 것인가? 용액의 종류와 농도는 무엇인가?</span></li>
+  <li><span><b>봉우리를 찾는다.</b> 125, 165, 187 근처에 신호가 서는가? 원본의 가로축은 보정된 값이라 정수와 딱 맞지 않을 수 있다.</span></li>
+  <li><span><b>구간을 바꿔 본다.</b> 110–200으로 확대하고 ‘다시 1로 맞추기’를 켜면 세로 눈금이 어떻게 바뀌는가? 무엇이 또렷해지는가?</span></li>
+  <li><span><b>용액을 바꿔 본다.</b> 네 용액을 번갈아 본다. 사라지는 봉우리와 남는 봉우리는 무엇인가?</span></li>
+  <li><span><b>스스로 묻는다.</b> 봉우리 하나로 “우주에서 발견했다”고 쓸 수 있을까? 봉우리 높이로 물질의 양을 말할 수 있을까?</span></li>
+ </ol>
+</section>
+
+<section>
+ <h2><span class="n">4</span>예상 결과와 비교한다</h2>
+ <p class="sub">책 5장 오른쪽 쪽의 숫자다. 조건을 바꿨다면 값이 달라지는 것이 정상이다. 무엇이 달라졌는지가 이 실습의 핵심이다.</p>
+ <div class="expect">
+  <h3>네 용액 모두에서 세 봉우리가 선다. 그러나 높이는 용액마다 다르다</h3>
+  <div id="cmp"></div>
+  <p class="note">비교 조건: 전체 구간 20–210, 범위 ±1, 가장 높은 신호(질량 23 부근의 나트륨 이온)=1. 같은 인산염 계열 봉우리라도 용액의 종류·농도·함께 녹은 물질에 따라 높이가 크게 달라진다. 혼합액의 187이 가장 낮다고 인산염이 가장 적다고 말할 수 없다.</p>
+ </div>
+ <h3 style="margin-top:22px;font-size:15px">결과가 다르다면</h3>
+ <ul class="note">
+  <li>봉우리가 정수 위치에 없다고 틀린 것이 아니다. 범위를 ±2로 넓혀 본다.</li>
+  <li>구간을 확대하면 기준(최고 신호)이 바뀌어 높이가 커 보인다. ‘다시 1로 맞추기’가 켜져 있는지 확인한다.</li>
+  <li>Python 결과가 화면과 다르면 파일 지문(SHA256)부터 비교한다.</li>
+ </ul>
+</section>
+
+<section>
+ <h2><span class="n">5</span>같은 계산을 코드로</h2>
+ <p class="sub">표준 라이브러리만 쓰므로 Python 3만 있으면 된다.</p>
+<pre>python3 analysis.py                         # 네 용액의 봉우리 위치와 높이
+python3 analysis.py --check                 # 책의 예상 결과와 비교
+python3 analysis.py --window 2 --range 110 200   # 조건을 바꿔 보기</pre>
+ <div class="files">
+  <a href="analysis.py" download><b>analysis.py</b><span>같은 계산 · 표준 라이브러리</span></a>
+  <a href="notebook.ipynb" download><b>notebook.ipynb</b><span>그림과 함께 따라 하기</span></a>
+  <a href="expected.json" download><b>expected.json</b><span>책의 예상 결과</span></a>
+  <a href="data/mix.csv" download><b>data/mix.csv</b><span>혼합액 · 17,036행</span></a>
+  <a href="data/tri.csv" download><b>data/tri.csv</b><span>Na₃PO₄</span></a>
+  <a href="data/di.csv" download><b>data/di.csv</b><span>Na₂HPO₄</span></a>
+  <a href="data/phosphite.csv" download><b>data/phosphite.csv</b><span>아인산염 혼합액</span></a>
+  <a href="data/provenance.json" download><b>data/provenance.json</b><span>출처·처리 기록</span></a>
+ </div>
+</section>
+
+<section>
+ <h2><span class="n">6</span>연구 노트</h2>
+ <p class="sub">질문은 좁게, 선택과 결과는 따로. 다른 사람이 똑같이 다시 할 수 있게 적는다.</p>
+ <div id="note"></div>
+</section>
+
+<section>
+ <h2>다음 걸음</h2>
+ <p>아인산염 혼합액에서만 나타나는 봉우리를 찾아 위치와 탐색 범위를 기록해 두자. 다른 사람이 똑같이 다시 계산할 수 있게 하는 것이 재현의 시작이다. 카시니의 원자료는 <a href="https://pds.nasa.gov">NASA 행성자료시스템(PDS)</a>에 공개되어 있다.</p>
+</section>
+</main>
+<footer><div class="wrap">《우주 리서치》 5장 「얼음 아래 바다」의 실습 · 자료 이용 조건은 각 출처를 따른다.</div></footer>
+
+<script src="../assets/lab.js"></script>
+<script>
+const NAMES = {mix:"혼합액", tri:"Na₃PO₄", di:"Na₂HPO₄", phosphite:"아인산염 혼합"};
+const MARKS = [125, 165, 187];
+const EXPECTED = {tri:0.143, di:0.111, phosphite:0.075, mix:0.025};
+const state = {sol:"mix", lo:20, hi:210, w:1, renorm:false};
+const data = {};
+
+async function sha8(url){
+  const buf = await (await fetch(url)).arrayBuffer();
+  if (!crypto.subtle) return "—";
+  const h = await crypto.subtle.digest("SHA-256", buf);
+  return [...new Uint8Array(h)].slice(0,4).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function analyse(rows, w, lo, hi, renorm){
+  const sel = rows.filter(r=>r.m>=lo && r.m<=hi);
+  const top = renorm ? Math.max(...sel.map(r=>r.v)) : 1;
+  const peaks = {};
+  for (const c of MARKS){
+    let best=null;
+    for (const r of sel) if (Math.abs(r.m-c)<=w && (!best || r.v>best.v)) best=r;
+    if (best) peaks[c] = {mz:best.m, h:best.v/top};
+  }
+  return {sel, top, peaks};
+}
+function binned(sel, top, step){
+  const b = new Map();
+  for (const r of sel){ const k=Math.round(r.m/step)*step; b.set(k, Math.max(b.get(k)||0, r.v/top)); }
+  return [...b.entries()].sort((a,c)=>a[0]-c[0]);
+}
+function draw(){
+  const rows = data[state.sol];
+  const a = analyse(rows, state.w, state.lo, state.hi, state.renorm);
+  const pts = binned(a.sel, a.top, state.hi-state.lo>120 ? .25 : .1);
+  Lab.plot("#plot", {
+    series:[{x:pts.map(p=>p[0]), y:pts.map(p=>p[1]), width:1}],
+    xmin:state.lo, xmax:state.hi, ymin:0,
+    ymax: state.renorm ? 1.05 : (state.lo<30 ? 1.05 : Math.max(...pts.map(p=>p[1]))*1.15),
+    bands: MARKS.filter(c=>c>=state.lo&&c<=state.hi).map(c=>({x0:c-state.w, x1:c+state.w, label:String(c)})),
+    xlabel:"질량 / 전하 (u/e)", ylabel: state.renorm ? "상대 신호 (이 구간 최고=1)" : "상대 신호 (20–210 최고=1)"
+  });
+  document.querySelector("#cap").textContent =
+    `${NAMES[state.sol]} · ${state.lo}–${state.hi} u/e · 봉우리 범위 ±${state.w}. 선은 작은 구간마다 가장 큰 값을 이었다.`;
+  let h = "<tr><th>명목 질량</th><th>찾은 위치(m/z)</th><th>높이</th></tr>";
+  for (const c of MARKS){ const p=a.peaks[c]; h += `<tr><td>${c}</td><td class="num">${p?Lab.fmt(p.mz,2):"구간 밖"}</td><td class="num">${p?Lab.fmt(p.h,3):"—"}</td></tr>`; }
+  document.querySelector("#peaks").innerHTML = h;
+  Lab.compare("#cmp", Object.keys(EXPECTED).map(k=>{
+    const r = analyse(data[k], state.w, state.lo, state.hi, state.renorm);
+    return {label:`${NAMES[k]} · 187 높이`, mine:r.peaks[187]?.h, expected:EXPECTED[k], tol:.002, digits:3};
+  }));
+}
+function seg(id, fn){
+  document.querySelectorAll(`#${id} button`).forEach(b=>b.onclick=()=>{
+    document.querySelectorAll(`#${id} button`).forEach(x=>x.classList.remove("on")); b.classList.add("on"); fn(b); draw();
+  });
+}
+(async()=>{
+  const names = Object.keys(NAMES);
+  const loaded = await Promise.all(names.map(k=>Lab.csv(`data/${k}.csv`)));
+  names.forEach((k,i)=>data[k]=loaded[i].map(r=>({m:r.mass_to_charge_u_per_e, v:r.relative_signal})));
+  document.querySelector("#sol").onchange = e=>{state.sol=e.target.value; draw();};
+  document.querySelector("#norm").onchange = e=>{state.renorm=e.target.checked; draw();};
+  seg("range", b=>{[state.lo,state.hi]=b.dataset.r.split(",").map(Number);});
+  seg("win", b=>{state.w=+b.dataset.w;});
+  draw();
+  const hs = await Promise.all(names.map(k=>sha8(`data/${k}.csv`)));
+  document.querySelector("#hashes").textContent = names.map((k,i)=>`${k}.csv ${hs[i]}`).join(" · ");
+  Lab.notebook("#note", "lab05", Lab.NOTE("인산염 봉우리(125·165·187)는 네 용액 모두에서 나타나는가? 범위를 넓히면 무엇이 바뀌나?"));
+})();
+</script>
+</body>
+</html>

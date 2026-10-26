@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>우주 리서치 실습</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@300;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+KR:wght@200;300;400;500;700;800&family=Noto+Serif+KR:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+:root{--ch:#1C2340;--ch-tint:#E3E5EF}
+.cover{position:relative;background:#05060c url(assets/cover_abell.jpg) center 70%/cover no-repeat;color:#fff;padding-block:64px 52px}
+.cover::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,6,12,.88) 0%,rgba(5,6,12,.55) 55%,rgba(5,6,12,.15) 100%)}
+.cover .wrap{position:relative}
+.cover .kick{font-family:'IBM Plex Mono',monospace;letter-spacing:.3em}
+.cover h1{font-family:'Hahmlet','Noto Serif KR',serif;font-weight:600}
+.cover .credit{font-size:11px;color:#C9CDDB;margin-top:22px;opacity:.8}
+.cover .kick{color:#AEB5D6}
+.cover h1{color:#fff;font-size:clamp(34px,6vw,56px);margin:10px 0}
+.cover .lede{color:#E4E7F3;font-family:var(--serif)}
+.cover .who{color:#AEB5D6;font-size:14px;margin-top:18px}
+.levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0;border-top:1px solid var(--ink)}
+.levels div{padding:16px 16px 16px 0;border-bottom:1px solid var(--hair)}
+.levels b{display:block;color:var(--ink);font-size:16px}
+.levels .n{font-weight:200;font-size:30px;color:var(--ch);line-height:1}
+.labs .no{color:var(--c)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .labs .no{filter:brightness(2.2) saturate(.7)}:root:not([data-theme="light"]){--ch:#9AA6E0}}
+</style>
+</head>
+<body>
+<div class="cover"><div class="wrap">
+ <div class="kick">WOULD YOU RESEARCH?</div>
+ <h1>우주 리서치 · 실습</h1>
+ <p class="lede">책의 장마다 연결된 실제 연구 자료를 여기서 연다. 설치 없이 브라우저에서 조건을 바꿔 보고, 같은 계산을 Python으로 다시 하고, 책의 예상 결과와 당신의 결과를 비교한다.</p>
+ <div class="who">박지원 · 김용기 지음 · 충북대학교 천문우주학과</div>
+ <div class="credit">배경: 제임스웹 NIRCam이 본 아벨 S1063 은하단(실제 관측) · NASA, ESA, CSA, V. Kokorev, A. Pagan (STScI)</div>
+</div></div>
+<main class="wrap">
+
+<section>
+ <h2>세 단계로 참여한다</h2>
+ <p class="sub">새 발견을 요구하지 않는다. 세 단계 모두 연구자들이 매일 하는 일이다.</p>
+ <div class="levels">
+  <div><span class="n">1</span><b>자료를 읽는다</b>표의 한 줄, 그래프의 두 축이 무엇인지 확인한다. 브라우저만 있으면 된다.</div>
+  <div><span class="n">2</span><b>다시 계산한다</b>조건 하나를 바꿔 같은 계산을 한다. Python 코드와 노트북을 함께 둔다.</div>
+  <div><span class="n">3</span><b>비교하고 남긴다</b>책의 예상 결과와 대조하고, 무엇이 달랐는지 연구 노트에 적는다.</div>
+ </div>
+</section>
+
+<section>
+ <h2>열 개의 실습</h2>
+ <p class="sub">지구 바로 바깥에서 관측 가능한 우주의 끝까지, 책의 순서를 따른다.</p>
+ <ul class="labs">
+  <li><a href="lab01/index.html" style="--c:#D98A3D"><span class="no">01</span><span><span class="t">경보선을 어디에 그을까</span><br><span class="d">1장 태양 폭풍 · NOAA 플레어 예보 9,804일</span></span><span class="m">20분</span></a></li>
+  <li><a href="lab02/index.html" style="--c:#A88A5A"><span class="no">02</span><span><span class="t">달의 두 얼굴, 지각 두께로 비교하기</span><br><span class="d">2장 돌의 기억 · GRAIL 지각 두께 모형</span></span><span class="m">20분</span></a></li>
+  <li><a href="lab03/index.html" style="--c:#6E7F8D"><span class="no">03</span><span><span class="t">33분에서 β까지</span><br><span class="d">3장 소행성 방위 · DART 충돌 뒤 공전 주기 변화</span></span><span class="m">30분</span></a></li>
+  <li><a href="lab04/index.html" style="--c:#B5543C"><span class="no">04</span><span><span class="t">표범 무늬의 원소 세기</span><br><span class="d">4장 화성의 돌 · 퍼서비어런스 PIXL 측정점 1,649개</span></span><span class="m">30분</span></a></li>
+  <li><a href="lab05/index.html" style="--c:#2E8C86"><span class="no">05</span><span><span class="t">인산염의 지문 찾기</span><br><span class="d">5장 얼음 아래 바다 · 실험실 질량 스펙트럼(Zenodo)</span></span><span class="m">20분</span></a></li>
+  <li><a href="lab06/index.html" style="--c:#3F7CB8"><span class="no">06</span><span><span class="t">이산화탄소의 봉우리 재기</span><br><span class="d">6장 다른 행성의 하늘 · 제임스웹 WASP-39 b 스펙트럼</span></span><span class="m">20분</span></a></li>
+  <li><a href="lab07/index.html" style="--c:#5C5FB0"><span class="no">07</span><span><span class="t">펄서 후보 분류기 시험하기</span><br><span class="d">7장 하늘의 자료 · HTRU2 후보 17,898개</span></span><span class="m">25분</span></a></li>
+  <li><a href="lab08/index.html" style="--c:#7D5A9E"><span class="no">08</span><span><span class="t">두 관측소의 떨림 겹쳐 보기</span><br><span class="d">8장 시공간의 떨림 · GWOSC GW150914 파형</span></span><span class="m">20분</span></a></li>
+  <li><a href="lab09/index.html" style="--c:#B8475E"><span class="no">09</span><span><span class="t">341개 목록에서 표본을 직접 고르기</span><br><span class="d">9장 작은 붉은 점 · 제임스웹 후보 목록</span></span><span class="m">20분</span></a></li>
+  <li><a href="lab10/index.html" style="--c:#3B4380"><span class="no">10</span><span><span class="t">우주의 자로 팽창률 재기</span><br><span class="d">10장 우주의 자 · DESI DR2 거리비 13개</span></span><span class="m">25분</span></a></li>
+ </ul>
+</section>
+
+<section>
+ <h2>덤 · 서문의 숫자 다시 계산하기</h2>
+ <p class="sub">책의 서문에 실은 연구 동향 그래프를 만든 집계표를 그대로 열어 볼 수 있다.</p>
+ <ul class="labs"><li><a href="lab00/index.html" style="--c:#1C2340"><span class="no">00</span><span><span class="t">연구 동향을 다시 계산하기</span><br><span class="d">OpenAlex 논문 집계표 — 늘어난 것과 비중이 커진 것은 다르다</span></span><span class="m">15분</span></a></li></ul>
+</section>
+
+<section>
+ <h2>결과가 예상과 다를 때</h2>
+ <p>누가 틀렸는지 따지기 전에 연구자들이 하는 순서대로 확인한다. 먼저 같은 파일인지(페이지마다 파일 지문 SHA256을 적어 두었다), 다음으로 단위와 기준값, 빈칸과 이상한 값의 처리, 마지막으로 계산의 순서. 차이의 원인을 찾았다면 그것이 이 실습에서 가장 과학다운 순간이다.</p>
+ <p class="note">연구 노트는 각자의 브라우저에만 저장되고 어디로도 보내지지 않는다. 자료의 이용 조건은 페이지마다 적은 원래 출처를 따른다.</p>
+</section>
+
+<section>
+ <h2>지은이</h2>
+ <p><b>박지원</b> · 충북대학교 기초과학연구소, 충북대학교 천문우주학과. 초빙교원으로 「대중천문학개론」, 관측천문학, 대중천문학과 기기, 천문기기 수업을 맡아 왔다. 천문 서지학과 연구 동향 분석을 연구하고, 세종 대 해시계 정남일구 복원 모델(『천문학논총』 2023) 등 고천문 연구에도 참여했다. 양자 기술을 활용한 천문학 교육, 교사 연수와 학생 교육 등 대중천문학 활동을 하고 있다.</p>
+ <p><b>김용기</b> · 충북대학교 천문우주학과 교수. 백색왜성 같은 천체의 주기 변화와 진화를 관측으로 연구하고, 충북대학교 천문대의 소형망원경으로 외계행성·소행성·인공위성을 추적 관측한다. 대학원의 대중천문학 석사·박사 과정에서 전국 천문과학관의 대중천문학자를 길러 왔으며, 천문 교구와 교육 프로그램, 시각장애인과 함께 배우는 천문 프로그램을 만들어 왔다.</p>
+</section>
+</main>
+<footer><div class="wrap">《우주 리서치 — 지금 천문학자들이 묻는 열 개의 질문, 그리고 당신의 차례》 동반 실습 · 2026</div></footer>
+<script>
+/* 책의 QR(…#lab03)로 들어오면 그 실습 페이지로 바로 넘긴다 */
+(function(){var m=/^#(lab\d\d)$/.exec(location.hash);if(m){location.replace(m[1]+"/index.html");}})();
+</script>
+</body>
+</html>

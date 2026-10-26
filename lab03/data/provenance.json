@@ -1,0 +1,17 @@
+[
+  {
+    "id": "dart_published_values",
+    "file": "dart_published_values.csv",
+    "sha256": "ef35ddfbe0dadfa2f263f0a6b76ae440a857db6a9323d5c0255c0372099bc830",
+    "source": [
+      "Cheng, A. F. et al. (2023) Nature 616, 457-460, Extended Data Table 1, doi:10.1038/s41586-023-05878-z (arXiv:2303.03464)",
+      "Thomas, C. A. et al. (2023) Nature 616, 448-451, doi:10.1038/s41586-023-05805-2 (arXiv:2303.02077)"
+    ],
+    "retrieved": "2026-10-26",
+    "license": "논문에 공개된 사실 값의 인용(표 옮김). 원문은 각 논문의 이용 조건을 따른다.",
+    "source_kind": "공개된 논문 표의 숫자(관측 원자료가 아님)",
+    "processing": "책 자료 폴더(book/assets/ch10/data)의 파일을 그대로 복사. 가공 없음.",
+    "columns": "quantity, symbol, value, unit, uncertainty_1sigma, source. 벡터 U는 km/s, E·eT는 단위벡터(무차원).",
+    "limitations": "디모르포스의 밀도는 측정값이 아니라 가정(1500–3300 kg/m³, 균일분포)이다. 그래서 β는 하나의 수가 아니라 밀도의 함수로 읽어야 한다. 헤라(Hera)가 질량을 재면 좁혀진다."
+  }
+]

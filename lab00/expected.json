@@ -1,0 +1,21 @@
+{
+ "lab": "00",
+ "title": "연구 동향을 다시 계산하기",
+ "book_pages": "서문 직접 해보기",
+ "conditions": {
+  "early_years": ["2021", "2022"],
+  "recent_years": ["2024", "2025"],
+  "denominator": "science (과학 19개 주제군 전체)",
+  "excluded": "2026년은 아직 끝나지 않은 해라 뺐다"
+ },
+ "baseline": {"early": 56694, "recent": 65001, "growth_pct": 14.7},
+ "topics": {
+  "exoplanet_atmosphere": {"early": 110, "recent": 128, "growth_pct": 16.4, "share_early_pct": 0.19, "share_recent_pct": 0.20},
+  "gravitational_wave": {"early": 1425, "recent": 1956, "growth_pct": 37.3, "share_early_pct": 2.51, "share_recent_pct": 3.01},
+  "lrd": {"early": 0, "recent": 82, "growth_pct": null, "share_early_pct": 0.0, "share_recent_pct": 0.13, "yearly": [0, 0, 1, 15, 67]}
+ },
+ "tolerance_pct": 0.05,
+ "tolerance_share": 0.005,
+ "sha256_8": {"keyword_metrics.csv": "38982ab5", "denominators.csv": "277afb71"},
+ "summary": "외계행성 대기는 건수가 늘었지만 비중은 거의 그대로(0.19→0.20%), 중력파는 건수와 비중이 함께 커졌다(2.51→3.01%). 기준이 0건인 주제는 증가율을 쓰지 않는다."
+}

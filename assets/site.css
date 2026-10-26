@@ -1,0 +1,99 @@
+/* 우주 리서치 실습 페이지 — 책과 같은 지면 원칙(먹색 + 장 색, 가는 선) */
+:root{
+  --ink:#222;--text:#2A2A2A;--grey:#6F6B63;--hair:#D9D3C8;--paper:#FAF8F4;--navy:#1C2340;--orange:#D9733D;
+  --ch:#2E8C86;--ch-tint:#E4EFED;
+  --sans:"Noto Sans KR",system-ui,sans-serif;--serif:"Noto Serif KR",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#ECE8E0;--text:#DDD8CE;--grey:#A39E94;--hair:#3A3A3A;--paper:#16171C}}
+:root[data-theme="dark"]{--ink:#ECE8E0;--text:#DDD8CE;--grey:#A39E94;--hair:#3A3A3A;--paper:#16171C}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;font-family:var(--sans);color:var(--text);background:var(--paper);line-height:1.7}
+a{color:var(--ch)}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+header.top{border-bottom:1px solid var(--hair)}
+header.top .wrap{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:14px}
+header.top a.home{color:var(--ink);text-decoration:none;font-weight:800;letter-spacing:-.02em}
+header.top .chap{color:var(--grey)}
+header.top .chap::before{content:"";display:inline-block;width:9px;height:9px;background:var(--ch);margin-right:8px}
+
+.hero{padding:40px 0 22px;border-bottom:2px solid var(--ink)}
+.kick{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--ch)}
+h1{font-size:clamp(26px,4vw,38px);line-height:1.25;letter-spacing:-.03em;margin:8px 0 10px;color:var(--ink)}
+.meta{font-size:14px;color:var(--grey)}
+.lede{font-family:var(--serif);font-size:17px;line-height:1.85;max-width:720px;margin:18px 0 0}
+
+section{padding:28px 0;border-bottom:1px solid var(--hair)}
+h2{font-size:20px;letter-spacing:-.02em;margin:0 0 6px;color:var(--ink)}
+h2 .n{font-weight:300;color:var(--ch);margin-right:10px}
+.sub{color:var(--grey);font-size:14px;margin:0 0 16px}
+p{max-width:740px}
+
+/* 자료 출처 표 */
+table.prov{width:100%;border-collapse:collapse;font-size:14px}
+table.prov td{padding:8px 0;border-bottom:1px solid var(--hair);vertical-align:top}
+table.prov td:first-child{width:150px;font-weight:700;color:var(--ink);padding-right:12px}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em}
+
+/* 조작판 */
+.controls{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:flex-end;padding:14px 0 16px;border-top:1px solid var(--ink);border-bottom:1px solid var(--hair);margin-bottom:14px}
+.ctl{display:flex;flex-direction:column;gap:4px;font-size:13px}
+.ctl label{font-weight:700;color:var(--ink)}
+.ctl select,.ctl input[type=number]{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--hair);background:var(--paper);color:var(--text);min-width:120px}
+.ctl input[type=range]{width:200px;accent-color:var(--ch)}
+.ctl .val{font-family:ui-monospace,Menlo,monospace;color:var(--ch)}
+.seg{display:flex;border:1px solid var(--ink)}
+.seg button{font:inherit;font-size:13px;padding:6px 12px;background:transparent;color:var(--text);border:0;border-right:1px solid var(--ink);cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--ink);color:var(--paper)}
+
+.plot{width:100%;overflow-x:auto}
+.plot svg{display:block;width:100%;height:auto;min-width:520px}
+.plot text{font-family:var(--sans);fill:var(--grey);font-size:12px}
+.plot .lab{fill:var(--ink);font-weight:700}
+.caption{font-size:13px;color:var(--grey);margin-top:6px}
+
+/* 결과 표 */
+table.res{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}
+table.res th{text-align:left;font-size:12px;letter-spacing:.06em;color:var(--grey);font-weight:700;border-bottom:1px solid var(--ink);padding:6px 8px 6px 0}
+table.res td{padding:8px 8px 8px 0;border-bottom:1px solid var(--hair);font-variant-numeric:tabular-nums}
+table.res td.num{font-family:ui-monospace,Menlo,monospace}
+
+/* 단계 */
+ol.steps{list-style:none;padding:0;margin:0;counter-reset:s;max-width:760px}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:44px 1fr;padding:12px 0;border-top:1px solid var(--hair)}
+ol.steps li::before{content:counter(s);font-weight:300;font-size:26px;line-height:1;color:var(--ch)}
+ol.steps b{color:var(--ink)}
+
+/* 예상 결과 비교 */
+.expect{background:var(--ch-tint);border-left:5px solid var(--ch);padding:16px 20px;margin-top:8px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .expect{background:rgba(255,255,255,.04)}}
+.expect h3{margin:0 0 4px;font-size:16px;color:var(--ink)}
+.cmp{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+.cmp td,.cmp th{padding:7px 8px 7px 0;border-bottom:1px solid var(--hair);text-align:left}
+.cmp th{font-size:12px;color:var(--grey)}
+.ok{color:var(--ch);font-weight:700}
+.diff{color:var(--orange);font-weight:700}
+.note{font-size:14px;color:var(--grey);max-width:740px}
+
+/* 내려받기 */
+.files{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0;border-top:1px solid var(--ink)}
+.files a{display:block;padding:12px 12px 12px 0;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--text);font-size:14px}
+.files a b{display:block;color:var(--ink)}
+.files a span{color:var(--grey);font-size:12.5px}
+pre{background:rgba(0,0,0,.04);padding:12px 14px;overflow-x:auto;font-size:13px;line-height:1.55;border-left:3px solid var(--hair)}
+
+/* 연구 노트 */
+textarea.notebox{width:100%;min-height:150px;font:14px/1.7 var(--sans);padding:12px;border:1px solid var(--hair);background:var(--paper);color:var(--text)}
+.btn{font:inherit;font-size:14px;padding:8px 14px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink)}
+
+/* 첫 화면 */
+.labs{list-style:none;padding:0;margin:0;border-top:2px solid var(--ink)}
+.labs li a{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;padding:16px 0;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--text)}
+.labs .no{font-weight:200;font-size:34px;line-height:1}
+.labs .t{font-weight:800;font-size:17px;color:var(--ink);letter-spacing:-.02em}
+.labs .d{font-size:13.5px;color:var(--grey)}
+.labs .m{font-size:12.5px;color:var(--grey);text-align:right;white-space:nowrap}
+footer{padding:32px 0 60px;font-size:13px;color:var(--grey)}
+@media (max-width:640px){.labs li a{grid-template-columns:48px 1fr}.labs .m{display:none}.ctl input[type=range]{width:150px}}

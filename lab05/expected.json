@@ -1,0 +1,28 @@
+{
+ "lab": "03",
+ "title": "인산염의 지문 찾기",
+ "book_pages": "5장 직접 해보기",
+ "conditions": {
+  "window": 1.0,
+  "range": [
+   20,
+   210
+  ],
+  "normalisation": "구간 안 최고 신호=1"
+ },
+ "height_187": {
+  "tri": 0.143,
+  "di": 0.111,
+  "phosphite": 0.075,
+  "mix": 0.025
+ },
+ "top_mz_all": 23.1,
+ "tolerance": 0.002,
+ "sha256_8": {
+  "mix": "4dff0d18",
+  "tri": "b58e4e8b",
+  "di": "7c07f65f",
+  "phosphite": "4db0d05e"
+ },
+ "summary": "네 용액 모두 125·165·187 부근에 봉우리가 서지만, 187 높이는 0.03–0.14로 용액마다 다르다. 높이로 양을 말할 수 없다."
+}

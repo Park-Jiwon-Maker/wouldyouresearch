@@ -1,0 +1,26 @@
+[
+  {
+    "id": "keyword_metrics.csv",
+    "source": "OpenAlex (https://openalex.org) 논문 기록을 이 책의 동향 분석을 위해 주제별 검색식으로 집계한 표",
+    "frozen": "2026-10-22",
+    "license": "OpenAlex 자료는 CC0 (집계와 검색식 선택은 이 책의 작업)",
+    "origin_file": "book/assets/ch00/data/keyword_metrics.csv (UTF-8 BOM 포함, 23행)",
+    "processing": "BOM 제거. 열 id, label_ko, layer, corpus, 2021–2025, ytd2026만 남김. 원본에 있던 early, recent, absolute_change, growth_pct, share 계열 열은 이 페이지와 analysis.py가 연도별 건수에서 다시 계산하므로 뺌. query 열은 쉼표·따옴표 때문에 queries.json으로 분리.",
+    "columns": "corpus: science19=과학 19개 주제군 분모를 쓰는 주제, all24=공학을 더한 분모를 쓰는 주제(우주잔해). 2021–2025: 해당 연도 논문 기록 수. ytd2026: 2026년 10월 22일까지의 건수(비교에 쓰지 않음).",
+    "limitations": "제목·초록 검색식에 걸리는 기록만 센다. 검색식이 놓치는 논문, 한 논문이 여러 주제에 걸리는 중복, 데이터베이스의 분류 변경이 있을 수 있다. 증가율은 연구의 질이나 중요도가 아니라 기록 수의 변화다."
+  },
+  {
+    "id": "denominators.csv",
+    "source": "OpenAlex 천문·우주과학 전체 기록 수 (책 동향 분석의 분모)",
+    "frozen": "2026-10-22",
+    "license": "CC0",
+    "origin_file": "book/assets/ch00/data/denominators.json",
+    "processing": "JSON에서 2021–2025년의 science(과학 19개 주제군), engineering(공학), all(둘의 합)만 CSV로 옮김. 2025_ytd, 2026_ytd, raw_all은 뺌.",
+    "limitations": "2026년은 아직 끝나지 않은 해라 뺐다. raw_all(필터 전 전체)은 이 실습에 쓰지 않는다."
+  },
+  {
+    "id": "queries.json",
+    "source": "keyword_metrics.csv 원본의 query 열",
+    "processing": "주제 id → 검색식 문자열로 분리. 내용은 바꾸지 않음."
+  }
+]

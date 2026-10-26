@@ -1,0 +1,127 @@
+{
+ "lab": "04",
+ "title": "표범 무늬의 원소 세기",
+ "book_pages": "4장 직접 해보기",
+ "conditions": {
+  "scan": "sol 1188 (2024-06-23) 체야바 폭포 PIXL 점 1,649개",
+  "baseline": "인산철 없는 이암 502점 평균",
+  "ratio": "구역 평균 ÷ 바탕 평균",
+  "mean": "점별 wt% 단순 평균(가중 없음)"
+ },
+ "counts": {
+  "matrix": 502,
+  "rims": 243,
+  "cores": 43,
+  "band": 1649
+ },
+ "rows": [
+  {
+   "label": "테두리 P2O5 배수",
+   "region": "rims",
+   "oxide": "P2O5",
+   "kind": "ratio",
+   "value": 1.9
+  },
+  {
+   "label": "테두리 FeO-T 배수",
+   "region": "rims",
+   "oxide": "FeO-T",
+   "kind": "ratio",
+   "value": 1.16
+  },
+  {
+   "label": "테두리 CaO 배수",
+   "region": "rims",
+   "oxide": "CaO",
+   "kind": "ratio",
+   "value": 0.9
+  },
+  {
+   "label": "반점 속 SO3 배수",
+   "region": "cores",
+   "oxide": "SO3",
+   "kind": "ratio",
+   "value": 1.72
+  },
+  {
+   "label": "반점 속 FeO-T 배수",
+   "region": "cores",
+   "oxide": "FeO-T",
+   "kind": "ratio",
+   "value": 1.15
+  },
+  {
+   "label": "반점 속 CaO 배수",
+   "region": "cores",
+   "oxide": "CaO",
+   "kind": "ratio",
+   "value": 0.92
+  },
+  {
+   "label": "반점 속 NiO 배수",
+   "region": "cores",
+   "oxide": "NiO",
+   "kind": "ratio",
+   "value": 1.86
+  },
+  {
+   "label": "바탕 P2O5 평균(%)",
+   "region": "matrix",
+   "oxide": "P2O5",
+   "kind": "base",
+   "value": 1.75
+  },
+  {
+   "label": "테두리 P2O5 평균(%)",
+   "region": "rims",
+   "oxide": "P2O5",
+   "kind": "mean",
+   "value": 3.34
+  },
+  {
+   "label": "바탕 SO3 평균(%)",
+   "region": "matrix",
+   "oxide": "SO3",
+   "kind": "base",
+   "value": 4.49
+  },
+  {
+   "label": "반점 속 SO3 평균(%)",
+   "region": "cores",
+   "oxide": "SO3",
+   "kind": "mean",
+   "value": 7.72
+  },
+  {
+   "label": "바탕 CaO 평균(%)",
+   "region": "matrix",
+   "oxide": "CaO",
+   "kind": "base",
+   "value": 1.62
+  },
+  {
+   "label": "띠 전체 SO3 평균(%)",
+   "region": "band",
+   "oxide": "SO3",
+   "kind": "mean",
+   "value": 9.4
+  },
+  {
+   "label": "띠 전체 CaO 평균(%)",
+   "region": "band",
+   "oxide": "CaO",
+   "kind": "mean",
+   "value": 3.64
+  }
+ ],
+ "tolerance": 0.005,
+ "sha256_8": {
+  "ps__1188_0772445544_000rqc__05410104308341770000___j01.csv": "b935ae5a",
+  "pe__1188_0772443549_000rxl__05410104308341770003___j02.csv": "10afad2d",
+  "sol_01188_cheyava_falls_matrix_without_fe_phosphate_pmc.csv": "2f222a19",
+  "sol_01188_cheyava_falls_leopard_spot_rims_and_poppy_seeds_pmc.csv": "f126d095",
+  "sol_01188_cheyava_falls_leopard_spot_cores_pmc.csv": "29d29c4e",
+  "points.csv": "8adb47ec"
+ },
+ "summary": "테두리엔 인(P₂O₅ 1.90배)이, 반점 속엔 황(SO₃ 1.72배)이 바탕보다 두 배 가까이 몰렸다. 띠 전체 평균은 오른쪽 끝의 황산칼슘 맥 때문에 SO₃ 9.40%·CaO 3.64%로 바탕과 크게 다르다."
+}

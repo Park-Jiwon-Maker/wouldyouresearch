@@ -1,0 +1,30 @@
+{
+ "source": "Wieczorek et al. 2013; GRAIL Crustal Thickness Archive v1",
+ "doi": "10.5281/zenodo.997347",
+ "url": "https://zenodo.org/records/997347",
+ "retrieved": "2026-10-22",
+ "kind": "GRAIL 중력·LOLA 지형 등을 바탕으로 추정한 공개 지각 두께 모형. 원시 중력 관측값이 아니다.",
+ "original_shape": [
+  721,
+  1441
+ ],
+ "original_step_deg": 0.25,
+ "original_units": "km",
+ "derivation": "북위 89도부터 남위 89도, 동경 -179도부터 179도의 2도 간격 중심점을 추출. 보간 없음. 동경 360도 중복 열 제외. CSV는 소수 6자리. 면적 가중치는 위도의 코사인.",
+ "model1": "Table S2: porosity12%, Apollo12/14 constraint29.9km, mantle3220kg/m3, globalmean~34km",
+ "model3": "Table S2: porosity12%, Apollo12/14 constraint38.1km, mantle3150kg/m3, globalmean~43km",
+ "rows": 16200,
+ "sha256": {
+  "관련자료/달/05_실제데이터/GRAILCrustalThicknessArchive.zip": "4ea89cac2564f666c0eed5300c6d4852b43c284d46f80631d0bdd5710353ad2c",
+  "관련자료/달/05_실제데이터/Model1_thick.dat": "34f2e6241028b44cf13b722de83fdc1ab3fcb192049ae3014cf8f76e5344d8c5",
+  "관련자료/달/05_실제데이터/Model3_thick.dat": "039b3ed77a225eeabfdcc978523d720c6c6d199533fc44015999d71b90dd38a1",
+  "독자실습/moon/data/lunar_crust_2deg.csv": "bac55f45066a58e26f16eb727f4d804d7515d5e7a3ba624024f42a571146c72c"
+ },
+ "path_base": "6장 폴더",
+ "lab_copy": {
+  "file": "lunar_crust_2deg.csv",
+  "sha256": "bac55f45066a58e26f16eb727f4d804d7515d5e7a3ba624024f42a571146c72c",
+  "processing": "책 자료 폴더의 파일을 그대로 복사(수정·축소 없음). 열: latitude_deg, longitude_east_deg, model1_km, model3_km. 16,200행.",
+  "license_note": "Wieczorek et al. 2013(Science 339:671)의 지각 두께 모형, GRAIL Crustal Thickness Archive v1(Zenodo). 이용 조건은 Zenodo 기록을 따른다."
+ }
+}

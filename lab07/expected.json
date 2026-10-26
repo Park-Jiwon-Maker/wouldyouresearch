@@ -1,0 +1,39 @@
+{
+ "lab": "05",
+ "title": "펄서 후보 분류기 시험하기",
+ "book_pages": "7장 직접 해보기",
+ "conditions": {
+  "seed": 20261023,
+  "split": "펄서·아닌 것을 따로 섞어 60/20/20 (학습/검증/시험)",
+  "standardisation": "학습 묶음의 평균·표준편차만 사용",
+  "model": "L2 로지스틱 회귀, 4,000회, 학습률 0.08, 규제 0.001",
+  "threshold_rule": "검증 묶음 재현율 90% 이상인 가장 높은 문턱(0.01 간격)"
+ },
+ "split_rows": [
+  10738,
+  3578,
+  3582
+ ],
+ "threshold": 0.16,
+ "validation_tp": 297,
+ "validation_pos": 327,
+ "test_tp": 287,
+ "test_pos": 329,
+ "test_kept": 345,
+ "test_recall": 0.872,
+ "test_precision": 0.832,
+ "test_accuracy": 0.972,
+ "baseline_accuracy": 0.908,
+ "test_at_0_5": [
+  254,
+  75,
+  16
+ ],
+ "tolerance": 0.0005,
+ "sha256_8": {
+  "HTRU_2.csv": "770932f2",
+  "scores.csv": "4d2e2522",
+  "model.json": "e2b23506"
+ },
+ "summary": "문턱 0.16: 시험 펄서 329개 중 287개를 남겼고 남긴 345개 중 58개는 펄서가 아니었다. 정확도 97.2%는 모두 ‘아님’의 90.8%보다 6.4%포인트 높을 뿐이다."
+}

@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이산화탄소의 봉우리 재기 · 우주 리서치 실습 06</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&family=Noto+Serif+KR:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>:root{--ch:#3F7CB8;--ch-tint:#E5EEF6}</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../index.html">우주 리서치 · 실습</a><span class="chap">6장 다른 행성의 하늘</span></div></header>
+<main class="wrap">
+
+<div class="hero">
+ <div class="kick">직접 해보기 04</div>
+ <h1>이산화탄소의 봉우리 재기</h1>
+ <div class="meta">약 20분 · 브라우저에서 코드 없이 · Python 선택</div>
+ <p class="lede">2022년 제임스웹 조기 공개 관측 팀이 첫 이산화탄소 논문과 함께 공개한 WASP-39 b의 투과 스펙트럼을 연다. 같은 통과를 네 연구진이 각자 처리한 결과다. 통과 깊이를 100만 배 해서 ppm으로 바꾼 것 말고는 손대지 않았다. 구간 두 개의 평균을 직접 재고, 경계와 처리팀을 바꿔 가며 어떤 숫자가 흔들리고 어떤 숫자가 버티는지 본다.</p>
+</div>
+
+<section>
+ <h2><span class="n">1</span>출처부터 확인한다</h2>
+ <p class="sub">그래프보다 먼저 읽어야 할 것: 이 자료는 어디서, 무엇으로, 어떻게 만들어졌는가.</p>
+ <table class="prov">
+  <tr><td>자료</td><td>JWST Transiting Exoplanet Community Early Release Science Team (2022), WASP-39 b 첫 관측 공개 자료. Zenodo <a href="https://doi.org/10.5281/zenodo.6959427">doi:10.5281/zenodo.6959427</a> (v1, 2022-08-03) · CC BY 4.0</td></tr>
+  <tr><td>무엇을 쟀나</td><td>2022-07-10, 제임스웹 NIRSpec PRISM으로 한 번 관측한 WASP-39 b의 통과. 별빛이 행성에 가려 얼마나 줄었나(통과 깊이)를 파장마다 나타낸 투과 스펙트럼. <b>네 결과는 네 번의 관측이 아니라 한 관측을 네 번 처리한 것이다.</b></td></tr>
+  <tr><td>이 페이지의 처리</td><td>원본 통과 깊이와 양쪽 1σ 오차에 10⁶을 곱해 ppm으로 변환. 파장은 μm 그대로. TIBERIUS의 불량 픽셀 표시(flag)는 보존했고 기본 계산에서는 표시된 18점을 뺀다. 새 보정·재적합·보간 없음. 모두 499행(FIREFLY 95 · TSHIRT 67 · TIBERIUS 243 · EUREKA 94).</td></tr>
+  <tr><td>파일 지문</td><td class="mono" id="hashes">—</td></tr>
+ </table>
+</section>
+
+<section>
+ <h2><span class="n">2</span>스펙트럼에서 봉우리를 직접 잰다</h2>
+ <p class="sub">처리 결과를 고르고, 두 구간의 경계를 바꾼다. 구간은 [시작, 끝)이다: 시작은 넣고 끝은 뺀다. 위쪽 점은 더 밝은 것이 아니라 더 많이 가린 것이다.</p>
+ <div class="controls">
+  <div class="ctl"><label for="pipe">처리 결과</label>
+   <select id="pipe">
+    <option value="FIREFLY">FIREFLY</option>
+    <option value="TSHIRT">TSHIRT</option>
+    <option value="TIBERIUS">TIBERIUS</option>
+    <option value="EUREKA">EUREKA</option>
+   </select></div>
+  <div class="ctl"><label for="fa">특징 구간 (μm)</label>
+   <span><input type="number" id="fa" step="0.05" value="4.2" style="min-width:80px;width:84px"> – <input type="number" id="fb" step="0.05" value="4.5" style="min-width:80px;width:84px"></span></div>
+  <div class="ctl"><label for="ca">비교 구간 (μm)</label>
+   <span><input type="number" id="ca" step="0.05" value="3.6" style="min-width:80px;width:84px"> – <input type="number" id="cb" step="0.05" value="3.9" style="min-width:80px;width:84px"></span></div>
+  <div class="ctl"><label>바로 가기</label><div class="seg" id="pre"><button data-p="4.2,4.5,3.6,3.9" class="on">책 기본</button><button data-p="4.3,4.4,3.6,3.9">특징 4.3–4.4</button><button data-p="4.2,4.5,5.0,5.3">비교 5.0–5.3</button></div></div>
+  <div class="ctl"><label><input type="checkbox" id="flag" checked> TIBERIUS 불량 픽셀 표시 점 빼기</label></div>
+ </div>
+ <p class="note" id="warn" style="color:var(--orange);margin:0 0 8px"></p>
+ <div class="plot" id="plot"></div>
+ <p class="caption" id="cap"></p>
+ <table class="res" id="tab"></table>
+</section>
+
+<section>
+ <h2><span class="n">3</span>해 볼 일</h2>
+ <ol class="steps">
+  <li><span><b>출처부터 확인한다.</b> 어느 망원경과 기기로, 언제 관측했는가? 네 처리 결과는 네 번의 관측인가, 한 관측을 네 번 처리한 것인가?</span></li>
+  <li><span><b>축을 읽는다.</b> 위쪽 점은 더 밝은 것이 아니라 더 많이 가린 것이다. 바탕의 21,000ppm 대부분은 행성 몸체의 그림자다.</span></li>
+  <li><span><b>두 구간을 잰다.</b> 4.2–4.5μm의 특징 구간과 3.6–3.9μm의 비교 구간에서 점의 수, 평균, 평균의 차이를 적는다. 경계에 걸친 점은 앞 구간에만 넣는다.</span></li>
+  <li><span><b>경계를 옮겨 본다.</b> 특징 구간을 4.3–4.4μm로 좁히면 차이가 어떻게 바뀌는가? 원하는 답이 나올 때까지 옮겼다면 그것은 사후 탐색이라고 기록한다.</span></li>
+  <li><span><b>처리팀을 바꾼다.</b> TSHIRT, TIBERIUS, EUREKA를 차례로 연다. TIBERIUS에서는 불량 픽셀로 표시된 18점을 뺀다. 무엇이 바뀌고 무엇이 그대로인가?</span></li>
+ </ol>
+</section>
+
+<section>
+ <h2><span class="n">4</span>예상 결과와 비교한다</h2>
+ <p class="sub">책 6장 오른쪽 쪽의 숫자다. 조건을 바꿨다면 값이 달라지는 것이 정상이다. 무엇이 달라졌는지가 이 실습의 핵심이다.</p>
+ <div class="expect">
+  <h3>네 처리 모두 4.35μm 부근이 가장 깊다</h3>
+  <div id="cmp"></div>
+  <p class="note">비교 조건: 특징 구간 [4.2, 4.5) · 비교 구간 [3.6, 3.9) μm, 산술평균, TIBERIUS는 표시된 18점을 뺀 225점. 위 조작판의 구간과 표시 점 설정이 그대로 반영된다. 책의 차이 값은 반올림한 정수(ppm)라 소수점 아래 반올림 범위(±0.5ppm)까지 ‘같음’으로 본다.</p>
+ </div>
+ <h3 style="margin-top:22px;font-size:15px">읽는 법</h3>
+ <ul class="note">
+  <li>봉우리의 위치는 네 처리에서 0.02μm 안에서 일치한다. 처리 방법이 만든 모양이 아니라는 것, 곧 주장의 첫 계단인 ‘측정’이 무엇에 기대고 있는지를 직접 확인한 셈이다. 차이의 크기는 150ppm 정도 갈린다. 점의 간격과 수, 바탕을 다루는 방식이 처리마다 다르기 때문이다.</li>
+  <li>이 숫자로 말할 수 없는 것도 있다. 이산화탄소의 양, 검출의 통계적 강도는 대기 모형을 맞추어야 나온다. 네 결과를 합쳐 오차를 줄일 수도 없다. 같은 관측이기 때문이다.</li>
+ </ul>
+ <h3 style="margin-top:22px;font-size:15px">결과가 다르다면</h3>
+ <ul class="note">
+  <li>점의 수가 다르면 구간 경계 규칙([4.2, 4.5): 4.2는 넣고 4.5는 뺀다)과 TIBERIUS의 표지 제외를 확인한다.</li>
+  <li>Python 결과가 화면과 다르면 자료 폴더의 provenance 파일로 원본 ZIP의 지문(MD5)부터 대조한다.</li>
+ </ul>
+</section>
+
+<section>
+ <h2><span class="n">5</span>같은 계산을 코드로</h2>
+ <p class="sub">표준 라이브러리만 쓰므로 Python 3만 있으면 된다.</p>
+<pre>python3 analysis.py                              # 네 처리 결과의 구간 평균과 차이
+python3 analysis.py --check                      # 책의 예상 결과와 비교
+python3 analysis.py --feature 4.3 4.4            # 특징 구간 좁히기
+python3 analysis.py --compare 5.0 5.3            # 비교 구간 옮기기
+python3 analysis.py --keep-flagged               # TIBERIUS 표시 점도 포함</pre>
+ <div class="files">
+  <a href="analysis.py" download><b>analysis.py</b><span>같은 계산 · 표준 라이브러리</span></a>
+  <a href="notebook.ipynb" download><b>notebook.ipynb</b><span>그림과 함께 따라 하기</span></a>
+  <a href="expected.json" download><b>expected.json</b><span>책의 예상 결과</span></a>
+  <a href="data/wasp39b_spectra.csv" download><b>data/wasp39b_spectra.csv</b><span>네 처리 결과 · 499행</span></a>
+  <a href="data/provenance.json" download><b>data/provenance.json</b><span>출처·처리 기록</span></a>
+ </div>
+</section>
+
+<section>
+ <h2><span class="n">6</span>연구 노트</h2>
+ <p class="sub">질문은 좁게, 선택과 결과는 따로. 다른 사람이 똑같이 다시 할 수 있게 적는다.</p>
+ <div id="note"></div>
+</section>
+
+<section>
+ <h2>다음 걸음</h2>
+ <p>비교 구간을 5.0–5.3μm로 옮겨 다시 계산하고, ‘어떤 파일, 무엇을 바꿨나, 무엇이 유지됐나, 무엇은 판단하지 못했나’ 네 문장으로 기록하자. 같은 자료로 같은 숫자를 얻는 다른 사람이 생기면 재현이 시작된다.</p>
+</section>
+</main>
+<footer><div class="wrap">《우주 리서치》 6장 「다른 행성의 하늘」의 실습 · 자료 이용 조건은 각 출처를 따른다.</div></footer>
+
+<script src="../assets/lab.js"></script>
+<script>
+const PIPES = ["FIREFLY","TSHIRT","TIBERIUS","EUREKA"];
+const EXPECTED = {
+  FIREFLY:{deep:4.358, diff:1236}, TSHIRT:{deep:4.356, diff:1230},
+  TIBERIUS:{deep:4.344, diff:1378}, EUREKA:{deep:4.348, diff:1264}
+};
+const state = {pipe:"FIREFLY", fa:4.2, fb:4.5, ca:3.6, cb:3.9, dropFlag:true};
+let rows = [];
+
+async function sha8(url){
+  const buf = await (await fetch(url)).arrayBuffer();
+  if (!crypto.subtle) return "—";
+  const h = await crypto.subtle.digest("SHA-256", buf);
+  return [...new Uint8Array(h)].slice(0,4).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function pts(pipe){ return rows.filter(r=>r.pipe===pipe && !(state.dropFlag && r.flag!==0)); }
+function band(p, a, b){
+  const v = p.filter(r=>r.w>=a && r.w<b).map(r=>r.d);   // 시작 포함, 끝 제외
+  return v.length ? {n:v.length, mean:v.reduce((s,x)=>s+x,0)/v.length} : null;
+}
+function summarize(pipe){
+  const p = pts(pipe), f = band(p, state.fa, state.fb), c = band(p, state.ca, state.cb);
+  const top = p.reduce((m,r)=>(!m||r.d>m.d)?r:m, null);
+  return {p, f, c, top, diff:(f&&c)?f.mean-c.mean:null};
+}
+function validate(){
+  if (![state.fa,state.fb,state.ca,state.cb].every(Number.isFinite)) return "구간 값이 숫자가 아니다.";
+  if (state.fa>=state.fb || state.ca>=state.cb) return "각 구간은 시작이 끝보다 작아야 한다.";
+  if (Math.max(state.fa,state.ca) < Math.min(state.fb,state.cb)) return "두 구간이 겹친다. 겹치지 않게 정한다.";
+  return "";
+}
+function draw(){
+  const warn = validate();
+  document.querySelector("#warn").textContent = warn;
+  const s = summarize(state.pipe);
+  const cs = getComputedStyle(document.documentElement);
+  const ink = cs.getPropertyValue("--ink").trim(), grey = cs.getPropertyValue("--grey").trim(), orange = cs.getPropertyValue("--orange").trim();
+  const YLO = 20400, YHI = 23200;
+  const inY = r=>r.d>=YLO && r.d<=YHI;
+  const used = s.p.filter(inY);
+  const all = rows.filter(r=>r.pipe===state.pipe && !s.p.includes(r) && inY(r));
+  const series = [{type:"dots", x:used.map(r=>r.w), y:used.map(r=>r.d), color:ink, r:2.4}];
+  if (all.length) series.push({type:"dots", x:all.map(r=>r.w), y:all.map(r=>r.d), color:grey, r:2.8, opacity:.55, label:"빼 둔 점(불량 픽셀 표시)"});
+  if (!warn){
+    if (s.c) series.push({x:[state.ca,state.cb], y:[s.c.mean,s.c.mean], color:orange, width:2.6});
+    if (s.f) series.push({x:[state.fa,state.fb], y:[s.f.mean,s.f.mean], color:orange, width:2.6});
+  }
+  Lab.plot("#plot", {
+    series, xmin:3.0, xmax:5.6, ymin:YLO, ymax:YHI, xticks:13,
+    bands:[{x0:state.ca,x1:state.cb,label:"비교"},{x0:state.fa,x1:state.fb,label:"특징"}].filter(()=>!warn),
+    vlines: s.top ? [{x:s.top.w, label:`가장 깊은 점 ${Lab.fmt(s.top.w,3)}`, color:grey, dash:"3 4"}] : [],
+    yfmt:v=>(v/1000).toFixed(0)+"천", xlabel:"파장 (μm) →", ylabel:"통과 깊이 (ppm)"
+  });
+  document.querySelector("#cap").textContent =
+    `${state.pipe} ${s.p.length}점` + (state.pipe==="TIBERIUS" ? (state.dropFlag ? " (표시 18점 제외)" : " (표시 점 포함 243점)") : "") +
+    ` · 주황 선은 두 구간 [시작, 끝)에 든 점들의 산술평균. 세로 불확실성 막대는 그리지 않았다(csv의 err 열 참고).`;
+  const row = (nm, b, a1, a2) => `<tr><td>${nm}</td><td class="num">${a1}–${a2}</td><td class="num">${b?b.n:"—"}</td><td class="num">${b?Lab.fmt(b.mean,1):"—"}</td></tr>`;
+  document.querySelector("#tab").innerHTML =
+    "<tr><th>구간</th><th>범위 (μm)</th><th>점 수</th><th>평균 (ppm)</th></tr>" +
+    row("특징 구간", s.f, state.fa, state.fb) + row("비교 구간", s.c, state.ca, state.cb) +
+    `<tr style="font-weight:700"><td>평균의 차이 (특징 − 비교)</td><td></td><td></td><td class="num">${s.diff==null?"—":Lab.fmt(s.diff,1)}</td></tr>` +
+    `<tr><td>가장 깊은 점</td><td></td><td></td><td class="num">${s.top?Lab.fmt(s.top.w,3)+" μm · "+Lab.fmt(s.top.d,0)+" ppm":"—"}</td></tr>`;
+  const cmp = [];
+  for (const p of PIPES){
+    const r = summarize(p);
+    cmp.push({label:`${p} · 가장 깊은 점의 파장`, mine:r.top?.w, expected:EXPECTED[p].deep, tol:.0006, digits:3, unit:" μm"});
+    cmp.push({label:`${p} · 두 구간 평균의 차이`, mine:warn?null:r.diff, expected:EXPECTED[p].diff, tol:.5, digits:0, unit:" ppm"});
+  }
+  Lab.compare("#cmp", cmp);
+}
+function setInputs(a,b,c,d){
+  state.fa=a; state.fb=b; state.ca=c; state.cb=d;
+  document.querySelector("#fa").value=a; document.querySelector("#fb").value=b;
+  document.querySelector("#ca").value=c; document.querySelector("#cb").value=d;
+}
+(async()=>{
+  const raw = await Lab.csv("data/wasp39b_spectra.csv");
+  rows = raw.map(r=>({pipe:r.pipeline, w:r.wavelength_um, d:r.depth_ppm, flag:+r.flag||0}));
+  document.querySelector("#pipe").onchange = e=>{state.pipe=e.target.value; draw();};
+  document.querySelector("#flag").onchange = e=>{state.dropFlag=e.target.checked; draw();};
+  for (const [id,k] of [["fa","fa"],["fb","fb"],["ca","ca"],["cb","cb"]])
+    document.querySelector("#"+id).oninput = e=>{
+      state[k] = e.target.value===""?NaN:+e.target.value;
+      document.querySelectorAll("#pre button").forEach(x=>x.classList.remove("on")); draw();
+    };
+  document.querySelectorAll("#pre button").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll("#pre button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+    setInputs(...b.dataset.p.split(",").map(Number)); draw();
+  });
+  draw();
+  document.querySelector("#hashes").textContent = "wasp39b_spectra.csv " + await sha8("data/wasp39b_spectra.csv");
+  Lab.notebook("#note", "lab06", Lab.NOTE("네 처리 결과에서 4.2–4.5μm 구간은 3.6–3.9μm보다 얼마나 더 깊은가? 구간 경계를 옮기면 이 차이는 어떻게 달라지나?"));
+})();
+</script>
+</body>
+</html>

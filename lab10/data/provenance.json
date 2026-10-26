@@ -1,0 +1,22 @@
+[
+  {
+    "id": "mean.txt, cov.txt",
+    "source_url": "https://github.com/CobayaSampler/bao_data",
+    "commit": "b7b8a36e9bccb063081f811f323cada21ab5fbdd (2025-03-20)",
+    "paper": "DESI Collaboration, DESI DR2 Results II: Measurements of BAO and Cosmological Constraints, Phys. Rev. D 112, 083515 (2025), doi:10.1103/tr6y-kpc6",
+    "official_guide": "https://data.desi.lbl.gov/public/papers/y3/bao-cosmo-params/README.html",
+    "license": "CC BY 4.0 (DESI 데이터 이용 지침 https://data.desi.lbl.gov/doc/acknowledgments/). 논문 인용, 변경 표시, 감사문 유지 조건.",
+    "sha256": {"mean.txt": "9ac154ab583ce759c0f7eef3c978c7c70a6ead2d18774caceadf1a350a640585", "cov.txt": "252a143274c8a07c78694c119617d36594f6d7965d00319ca611c6ffb886e509"},
+    "processing": "원본 그대로(변경 없음). 13개 거리비(DV/rd 1개, DM/rd·DH/rd 각 6개)와 13×13 공분산.",
+    "limitations": "거리비 13개는 1,400만 개 넘는 은하·퀘이사를 분석해 줄인 값이다. 이 실습의 모형은 평탄 ΛCDM 교육용 계산(복사·휘어짐·변하는 암흑에너지 없음, 우주배경복사·초신성 자료 없음)이라 연구진의 최적 모형이 아니다."
+  },
+  {
+    "id": "bao.csv",
+    "sha256": "8797f476cc70c8f66905c7e3d3ecbc978bba0dc323d63e5267ad17615623cb32",
+    "processing": "mean.txt의 값을 열 이름(z, value, quantity)이 있는 CSV로 옮기고, sigma 열에 cov.txt 대각 원소의 제곱근을 계산해 붙였다(책 제작 단계). 값은 mean.txt와 같고 줄 순서도 같다.",
+    "limitations": "sigma는 대각 원소만 쓴 단순 오차다. χ²는 sigma가 아니라 13×13 공분산 전체로 계산한다(DM과 DH 사이의 상관이 들어 있다)."
+  },
+  {
+    "acknowledgement": "This research used data obtained with the Dark Energy Spectroscopic Instrument (DESI). DESI construction and operations is managed by the Lawrence Berkeley National Laboratory. This material is based upon work supported by the U.S. Department of Energy, Office of Science, Office of High-Energy Physics, under Contract No. DE-AC02-05CH11231, and by the National Energy Research Scientific Computing Center, a DOE Office of Science User Facility under the same contract. Additional support for DESI was provided by the U.S. National Science Foundation (NSF), Division of Astronomical Sciences under Contract No. AST-0950945 to the NSF's National Optical-Infrared Astronomy Research Laboratory; the Science and Technology Facilities Council of the United Kingdom; the Gordon and Betty Moore Foundation; the Heising-Simons Foundation; the French Alternative Energies and Atomic Energy Commission (CEA); the National Council of Humanities, Science and Technology of Mexico (CONAHCYT); the Ministry of Science and Innovation of Spain (MICINN), and by the DESI Member Institutions: www.desi.lbl.gov/collaborating-institutions. The DESI collaboration is honored to be permitted to conduct scientific research on I'oligam Du'ag (Kitt Peak), a mountain with particular significance to the Tohono O'odham Nation. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the U.S. National Science Foundation, the U.S. Department of Energy, or any of the listed funding agencies."
+  }
+]

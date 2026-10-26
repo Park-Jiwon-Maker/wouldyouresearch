@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>두 관측소의 떨림 겹쳐 보기 · 우주 리서치 실습 08</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&family=Noto+Serif+KR:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>:root{--ch:#7D5A9E;--ch-tint:#EFEAF3}
+.big{display:flex;flex-wrap:wrap;gap:0 34px;align-items:baseline;border-top:1px solid var(--ink);padding:10px 0 4px;margin:6px 0 2px}
+.big div b{display:block;font-size:34px;font-weight:300;line-height:1.1;color:var(--ch);font-variant-numeric:tabular-nums}
+.big div span{font-size:12.5px;color:var(--grey)}
+.ctl input[type=number]{min-width:0;width:92px}
+.sm{font-size:13px;padding:5px 10px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.legend{display:flex;gap:18px;font-size:13px;color:var(--grey);margin:4px 0 0;flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:4px;margin-right:6px;vertical-align:middle}
+h3.s{margin:22px 0 6px;font-size:15px}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../index.html">우주 리서치 · 실습</a><span class="chap">8장 시공간의 떨림</span></div></header>
+<main class="wrap">
+
+<div class="hero">
+ <div class="kick">직접 해보기 06</div>
+ <h1>두 관측소의 떨림 겹쳐 보기</h1>
+ <div class="meta">약 20분 · 브라우저에서 코드 없이 · Python 선택</div>
+ <p class="lede">첫 검출 논문의 그림 1에 쓰인 파형 파일을 연다. 두 관측소의 기록에는 35–350헤르츠 대역만 남기는 필터와 장치 잡음 제거 필터가 이미 적용되어 있다. 원래의 원시 기록이 아니라 논문 그림을 위해 처리된 자료다. 핸퍼드(H)를 얼마나 밀고 뒤집어야 리빙스턴(L)과 겹치는지, 조건을 하나씩 바꿔 가며 확인한다.</p>
+</div>
+
+<section>
+ <h2><span class="n">1</span>출처부터 확인한다</h2>
+ <p class="sub">그래프보다 먼저 읽어야 할 것: 이 파형은 원시 기록인가, 처리된 기록인가? 어떤 필터가 적용되었는가?</p>
+ <table class="prov">
+  <tr><td>자료</td><td>GWOSC(중력파 공개과학센터)가 공개한 GW150914 그림 1의 파형. LIGO Scientific Collaboration · Virgo Collaboration 제공. Abbott 외 (2016), PRL 116, 061102, <a href="https://doi.org/10.1103/PhysRevLett.116.061102">doi:10.1103/PhysRevLett.116.061102</a></td></tr>
+  <tr><td>무엇을 쟀나</td><td>2015년 9월 14일 09:50:45(세계시) 이후 0.25–0.46초, 두 검출기(핸퍼드 H, 리빙스턴 L)의 스트레인. 각 파일 3,441행, 세로는 스트레인에 10²¹을 곱한 값.</td></tr>
+  <tr><td>이미 적용된 처리</td><td>35–350 Hz 통과 필터와 장치 선 잡음 제거 필터(논문 그림용). 이 페이지는 추가 필터도, 보정도 하지 않았다. 파일은 원본 그대로다.</td></tr>
+  <tr><td>두 번째 자료</td><td>NANOGrav 15년 교육용 요약(MIT 저장소, 고정 판본 a3e8b87)의 A÷오차 10,000행 · 3열(monopole·dipole·HD). 열 이름은 공식 노트북과 대조한 해석이며 원본 배열에는 이름이 없다. 줄인 교육용이라 논문 결과와 정확히 같지 않을 수 있다.</td></tr>
+  <tr><td>파일 지문</td><td class="mono" id="hashes">—</td></tr>
+ </table>
+</section>
+
+<section>
+ <h2><span class="n">2</span>두 기록을 직접 겹쳐 본다</h2>
+ <p class="sub">먼저 따로 본다. 그다음 H를 앞당기는 양, 부호 뒤집기, 비교 구간을 바꿔 상관계수 r이 어떻게 변하는지 본다.</p>
+
+ <h3 class="s" style="margin-top:6px">조정 전 · 따로 본 두 기록</h3>
+ <div class="plot" id="rawH"></div>
+ <div class="plot" id="rawL"></div>
+ <p class="caption">위: 핸퍼드(H) · 아래: 리빙스턴(L). 세로는 스트레인 × 10²¹. 연한 띠는 지금 비교하는 구간이다.</p>
+
+ <h3 class="s">조정하기</h3>
+ <div class="row">
+  <button class="btn sm" id="pPaper">논문 조건</button>
+  <button class="btn ghost sm" id="pNone">이동·반전 없음</button>
+  <button class="btn ghost sm" id="pFlip">부호만 반전</button>
+  <button class="btn ghost sm" id="pShift">이동만</button>
+  <button class="btn ghost sm" id="pWide">구간 넓히기 0.25–0.46</button>
+  <button class="btn ghost sm" id="pBest">상관 최대 이동량으로</button>
+ </div>
+ <div class="controls">
+  <div class="ctl"><label for="sh">H를 앞당기는 양 <span class="val" id="shv">6.9 ms</span></label><input type="range" id="sh" min="-15" max="15" step="0.1" value="6.9"></div>
+  <div class="ctl"><label><input type="checkbox" id="flip" checked> H의 부호 뒤집기</label></div>
+  <div class="ctl"><label for="t0">비교 구간 시작 (s)</label><input type="number" id="t0" min="0.25" max="0.45" step="0.01" value="0.30"></div>
+  <div class="ctl"><label for="t1">끝 (s)</label><input type="number" id="t1" min="0.26" max="0.46" step="0.01" value="0.45"></div>
+ </div>
+ <div class="big" id="big"></div>
+ <p class="note" id="warn" style="margin:2px 0 8px"></p>
+ <div class="plot" id="ovl"></div>
+ <div class="legend"><span><i style="background:var(--ch)"></i>L</span><span><i style="background:var(--ink)"></i>H (조정한 것)</span></div>
+ <p class="caption" id="ovlcap"></p>
+ <div class="plot" id="rcurve"></div>
+ <p class="caption" id="rcap"></p>
+
+ <h3 class="s">다른 자료 · NANOGrav 교육용 요약</h3>
+ <div class="controls">
+  <div class="ctl"><label for="comp">열</label><select id="comp"><option value="0">monopole</option><option value="1">dipole</option><option value="2" selected>HD (헬링스–다운스)</option></select></div>
+  <div class="ctl"><label for="bins">막대 수 <span class="val" id="binv">40</span></label><input type="range" id="bins" min="10" max="90" step="1" value="40"></div>
+ </div>
+ <div class="plot" id="hist"></div>
+ <p class="caption" id="hcap"></p>
+</section>
+
+<section>
+ <h2><span class="n">3</span>해 볼 일</h2>
+ <ol class="steps">
+  <li><span><b>출처부터 확인한다.</b> 이 파형은 원시 기록인가, 처리된 기록인가? 어떤 필터가 적용되었는가? (위 표)</span></li>
+  <li><span><b>따로 본다.</b> ‘조정 전’ 두 그래프에서 공통된 모양과 어긋난 곳을 각각 한 문장으로 적는다. 진동이 빨라지는 구간은 어디인가?</span></li>
+  <li><span><b>논문 조건을 적용한다.</b> ‘논문 조건’ 단추: H를 6.9밀리초 앞당기고 부호를 뒤집는다. 두 검출기의 팔 방향이 달라서 부호가 반대로 기록된다.</span></li>
+  <li><span><b>조건을 하나씩 끈다.</b> ‘부호만 반전’, ‘이동·반전 없음’, ‘이동만’을 눌러 상관계수가 어떻게 바뀌는지 적는다. 비교 구간을 넓히면 어떻게 되는가?</span></li>
+  <li><span><b>다른 자료로 넘어간다.</b> NANOGrav 열을 HD로 두고 막대 수를 바꿔 본다. 막대 수를 바꿔도 중앙값은 그대로인가?</span></li>
+ </ol>
+</section>
+
+<section>
+ <h2><span class="n">4</span>예상 결과와 비교한다</h2>
+ <p class="sub">책 8장 오른쪽 쪽의 숫자다. ‘현재 조건’이 붙은 항목은 위 조작판을 따라 바뀐다. 조건을 바꿨다면 값이 달라지는 것이 정상이다. 무엇이 달라졌는지가 이 실습의 핵심이다.</p>
+ <div class="expect">
+  <h3>논문 조건에서 두 파형이 겹친다. 조건 하나만 빠져도 겹치지 않는다</h3>
+  <div id="cmp"></div>
+  <p class="note">비교 조건: H를 6.9 ms 앞당기고 부호 반전, 구간 0.30–0.45 s. ‘고정 조건’ 항목은 조작판과 무관하게 같은 파일로 다시 계산한 값이다(코드 확인용). 이동만 하고 부호를 뒤집지 않으면 r은 −0.758로, 두 기록이 정확히 거울상으로 맞는다.</p>
+  <p class="note"><b>읽기.</b> 상관이 가장 큰 이동량 7.4 ms는 논문이 밝힌 범위(6.9, +0.5/−0.4 ms)의 끝자락에 있다. 그러나 이것은 필터를 거친 그림용 자료의 한 구간에서 계산한 값이다. 새로운 시간차를 쟀다고 말할 수 없고, 신호가 진짜일 확률이나 질량도 이 계산으로는 나오지 않는다. NANOGrav의 2.94는 검출 시그마가 아니다. 10,000행은 독립된 사건이 아니라 잡음 모형에서 뽑은 표본이다.</p>
+ </div>
+ <h3 style="margin-top:22px;font-size:15px">결과가 다르다면</h3>
+ <ul class="note">
+  <li>r이 0.758과 다르면 H를 ‘앞당겼는지’ 확인한다. 반대 방향(음수)으로 옮기면 겹치지 않는다. 보간 방법이 달라도 소수점 셋째 자리가 조금 바뀔 수 있다. 이 페이지는 L의 각 시각에서 H를 선형 보간하고, H 파일 끝을 넘는 값은 끝 값을 그대로 쓴다.</li>
+  <li>파일 첫 줄의 설명 줄을 숫자로 읽지 않았는지, 시간 열과 값 열을 바꿔 읽지 않았는지 본다.</li>
+  <li>Python 결과가 화면과 다르면 파일 지문(SHA256)부터 비교한다.</li>
+ </ul>
+</section>
+
+<section>
+ <h2><span class="n">5</span>같은 계산을 코드로</h2>
+ <p class="sub">표준 라이브러리만 쓰므로 Python 3만 있으면 된다.</p>
+<pre>python3 analysis.py                         # 논문 조건의 r과 NANOGrav 분포
+python3 analysis.py --check                 # 책의 예상 결과와 비교
+python3 analysis.py --shift 7.4             # 이동량 바꾸기(ms)
+python3 analysis.py --no-flip               # 부호를 뒤집지 않기
+python3 analysis.py --start 0.40 --end 0.43 # 비교 구간 바꾸기
+python3 analysis.py --component 1           # NANOGrav 열 고르기</pre>
+ <div class="files">
+  <a href="analysis.py" download><b>analysis.py</b><span>같은 계산 · 표준 라이브러리</span></a>
+  <a href="notebook.ipynb" download><b>notebook.ipynb</b><span>그림과 함께 따라 하기</span></a>
+  <a href="expected.json" download><b>expected.json</b><span>책의 예상 결과</span></a>
+  <a href="data/fig1-observed-H.txt" download><b>data/fig1-observed-H.txt</b><span>핸퍼드 · 3,441행</span></a>
+  <a href="data/fig1-observed-L.txt" download><b>data/fig1-observed-L.txt</b><span>리빙스턴 · 3,441행</span></a>
+  <a href="data/pta_summary_ratios.csv" download><b>data/pta_summary_ratios.csv</b><span>NANOGrav · 10,000행</span></a>
+  <a href="data/provenance.json" download><b>data/provenance.json</b><span>출처·처리 기록</span></a>
+ </div>
+</section>
+
+<section>
+ <h2><span class="n">6</span>연구 노트</h2>
+ <p class="sub">질문은 좁게, 선택과 결과는 따로. 조건·구간·결과를 세 줄로 남긴다.</p>
+ <div id="note"></div>
+</section>
+
+<section>
+ <h2>다음 걸음</h2>
+ <p>비교 구간을 0.40–0.43초처럼 합병 직전으로 좁혀 상관계수를 다시 재고, 구간·이동량·결과를 세 줄로 기록하자. GWOSC의 원시 기록에 직접 필터를 걸어 같은 그림을 만드는 것이 다음 단계다(<a href="https://gwosc.org">gwosc.org</a>).</p>
+</section>
+</main>
+<footer><div class="wrap">《우주 리서치》 8장 「시공간의 떨림」의 실습 · 자료는 GWOSC와 NANOGrav 교육용 저장소, 이용 조건은 각 출처를 따른다. 교육용 계산이며 검출 파이프라인이 아니다.</div></footer>
+
+<script src="../assets/lab.js"></script>
+<script>
+const FILES = ["fig1-observed-H.txt","fig1-observed-L.txt","pta_summary_ratios.csv"];
+const INK = () => getComputedStyle(document.documentElement).getPropertyValue("--ink").trim() || "#222";
+const st = {shift:6.9, flip:true, t0:0.30, t1:0.45, comp:2, bins:40};
+let H=[], L=[], PTA=[];
+
+function parseWave(t){
+  return t.replace(/\r/g,"").split("\n").filter(l=>l.trim() && !l.startsWith("#")).map(l=>{const a=l.trim().split(/\s+/).map(Number); return [a[0],a[1]];});
+}
+function interp(rows, t){
+  if (t <= rows[0][0]) return rows[0][1];
+  const n = rows.length-1;
+  if (t >= rows[n][0]) return rows[n][1];
+  let lo=0, hi=n;
+  while (hi-lo>1){ const m=(lo+hi)>>1; if (rows[m][0]<=t) lo=m; else hi=m; }
+  const a=rows[lo], b=rows[hi];
+  return a[1] + (b[1]-a[1])*(t-a[0])/(b[0]-a[0]);
+}
+function corr(a,b){
+  const n=a.length; let ma=0, mb=0;
+  for (let i=0;i<n;i++){ ma+=a[i]; mb+=b[i]; } ma/=n; mb/=n;
+  let sab=0, saa=0, sbb=0;
+  for (let i=0;i<n;i++){ const x=a[i]-ma, y=b[i]-mb; sab+=x*y; saa+=x*x; sbb+=y*y; }
+  return sab/Math.sqrt(saa*sbb);
+}
+function pearson(shiftMs, flip, t0, t1){
+  const sel = L.filter(r=>r[0]>=t0-1e-12 && r[0]<=t1+1e-12);
+  if (sel.length < 3) return {r:null, n:sel.length};
+  const sg = flip ? -1 : 1;
+  return {r:corr(sel.map(r=>sg*interp(H, r[0]+shiftMs/1000)), sel.map(r=>r[1])), n:sel.length};
+}
+function bestShift(flip, t0, t1){
+  let best=-2, bs=0;
+  for (let i=0;i<=150;i++){ const d=-15+i*0.2, r=pearson(d,flip,t0,t1).r; if (r!=null && r>best){best=r; bs=d;} }
+  return {shift:bs, r:best};
+}
+function quant(vals, p){
+  const s=[...vals].sort((a,b)=>a-b), x=(s.length-1)*p, i=Math.floor(x);
+  return s[i] + (x-i)*(s[Math.min(i+1,s.length-1)]-s[i]);
+}
+const sgn = v => (v<0?"−":"+") + Math.abs(v).toFixed(3);
+
+function draw(){
+  const {shift, flip, t0, t1} = st;
+  document.querySelector("#shv").textContent = shift.toFixed(1)+" ms";
+  const valid = t1>t0 && t0>=0.25 && t1<=0.46;
+  const p = valid ? pearson(shift, flip, t0, t1) : {r:null,n:0};
+  const band = valid ? [{x0:t0,x1:t1}] : [];
+  const ink = INK(), ch = getComputedStyle(document.documentElement).getPropertyValue("--ch").trim();
+  // 따로 보기
+  [["#rawH",H,"핸퍼드 (H)",ink],["#rawL",L,"리빙스턴 (L)",ch]].forEach(([id,rows,lab,col])=>
+    Lab.plot(id,{series:[{x:rows.map(r=>r[0]),y:rows.map(r=>r[1]),color:col,width:1.2}],xmin:.25,xmax:.46,ymin:-1.3,ymax:1.3,height:200,bands:band,xticks:7,ylabel:lab+" · 스트레인×10²¹",xlabel:id==="#rawL"?"기준 시각에서 지난 시간 (초)":""}));
+  // 큰 숫자
+  const b = valid ? bestShift(flip,t0,t1) : null;
+  document.querySelector("#big").innerHTML =
+    `<div><b>${p.r==null?"—":sgn(p.r)}</b><span>상관계수 r (현재 조건)</span></div>` +
+    `<div><b>${p.n.toLocaleString()}</b><span>비교한 L의 시각 수</span></div>` +
+    `<div><b>${b?b.shift.toFixed(1)+" ms":"—"}</b><span>이 부호·구간에서 r이 가장 큰 이동량</span></div>`;
+  document.querySelector("#warn").textContent = valid ? "" : "비교 구간을 0.25–0.46초 안에서 시작 < 끝으로 정해 주세요.";
+  // 겹침
+  const sg = flip ? -1 : 1;
+  Lab.plot("#ovl",{series:[
+      {x:L.map(r=>r[0]),y:L.map(r=>r[1]),color:ch,width:1.8},
+      {x:L.map(r=>r[0]),y:L.map(r=>sg*interp(H,r[0]+shift/1000)),color:ink,width:1.1}],
+    xmin:.25,xmax:.46,ymin:-1.3,ymax:1.3,height:300,bands:band,xticks:7,hlines:[{y:0}],
+    xlabel:"기준 시각에서 지난 시간 (초)",ylabel:"스트레인 × 10²¹"});
+  document.querySelector("#ovlcap").textContent =
+    `L(색)과, H를 ${shift.toFixed(1)} ms 앞당기고 부호 ${flip?"반전":"유지"}한 것(먹색). 연한 띠가 상관을 계산한 구간이다. 0.4599초를 넘는 H 값은 파일 끝 값으로 채운다.`;
+  // r 곡선
+  const D=[], R=[];
+  if (valid) for (let i=0;i<=150;i++){ const d=-15+i*0.2; D.push(+d.toFixed(1)); R.push(pearson(d,flip,t0,t1).r); }
+  const vl = valid ? [{x:shift,label:"현재 "+shift.toFixed(1),color:"#D9733D"}] : [];
+  if (valid) vl.push({x:b.shift,label:"최대 "+b.shift.toFixed(1),color:ink});
+  Lab.plot("#rcurve",{series:[{x:D.length?D:[0],y:R.length?R:[0],color:ink,width:1.5}],xmin:-15,xmax:15,ymin:-1,ymax:1,height:260,xticks:10,vlines:vl,hlines:[{y:0}],
+    xlabel:"H를 앞당긴 양 (ms)",ylabel:"상관계수 r (현재 부호·구간)"});
+  document.querySelector("#rcap").textContent = "H를 0.2 ms씩 밀면서 같은 구간의 상관계수를 계산한 곡선. 주황 선이 지금 슬라이더의 자리, 먹색 선이 최댓값의 자리다.";
+  // NANOGrav
+  const col = PTA.map(r=>r[st.comp]), lo=-2, hi=7, nb=st.bins, cnt=Array(nb).fill(0), w=(hi-lo)/nb;
+  document.querySelector("#binv").textContent = nb;
+  for (const v of col) if (v>=lo && v<hi) cnt[Math.min(nb-1,Math.floor((v-lo)/w))]++;
+  const q=[.16,.5,.84].map(x=>quant(col,x));
+  Lab.plot("#hist",{series:[{x:cnt.map((_,i)=>lo+(i+.5)*w),y:cnt,type:"bars",color:ch,barWidth:w*.96}],xmin:lo,xmax:hi,ymin:0,height:260,xticks:9,
+    vlines:[{x:q[1],label:"중앙값 "+q[1].toFixed(2),color:"#D9733D"}],xlabel:"추정량 ÷ 보고된 오차",ylabel:"행 수"});
+  const cn = ["monopole","dipole","HD"][st.comp];
+  document.querySelector("#hcap").textContent = `${cn} 열 ${col.length.toLocaleString()}행 · 중앙값 ${Lab.fmt(q[1],2)} · 16–84 백분위 ${Lab.fmt(q[0],2)}–${Lab.fmt(q[2],2)}. 막대 수를 바꿔도 중앙값은 그대로다(막대는 −2~7 사이만 그린다). 검출 시그마로 환산한 값이 아니다.`;
+  // 비교
+  const fx = FIXED;
+  Lab.compare("#cmp",[
+    {label:"GW150914 · 현재 조건의 r (논문 조건 0.758)", mine:p.r, expected:.758, tol:.0006, digits:3},
+    {label:"고정 조건: 부호만 반전 r", mine:fx.flip, expected:-.31, tol:.005, digits:2},
+    {label:"고정 조건: 이동·반전 없음 r", mine:fx.none, expected:.31, tol:.005, digits:2},
+    {label:"고정 조건: 구간 0.25–0.46 s로 넓힘 r", mine:fx.wide, expected:.708, tol:.0006, digits:3},
+    {label:"현재 부호·구간에서 r 최대 이동량", mine:b?b.shift:null, expected:7.4, tol:.05, digits:1, unit:" ms"},
+    {label:"NANOGrav 현재 열 · 값/오차 중앙값 (HD 2.94)", mine:q[1], expected:2.94, tol:.005, digits:2},
+    {label:"현재 열 · 16 백분위 (HD 2.31)", mine:q[0], expected:2.31, tol:.005, digits:2},
+    {label:"현재 열 · 84 백분위 (HD 3.60)", mine:q[2], expected:3.60, tol:.005, digits:2}
+  ]);
+}
+let FIXED = {};
+function sync(){
+  document.querySelector("#sh").value = st.shift; document.querySelector("#flip").checked = st.flip;
+  document.querySelector("#t0").value = st.t0; document.querySelector("#t1").value = st.t1;
+}
+function preset(o){ Object.assign(st,o); sync(); draw(); }
+async function sha8(url){
+  const buf = await (await fetch(url)).arrayBuffer();
+  if (!crypto.subtle) return "—";
+  const h = await crypto.subtle.digest("SHA-256", buf);
+  return [...new Uint8Array(h)].slice(0,4).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+(async()=>{
+  const [th, tl, tp] = await Promise.all(FILES.map(f=>fetch("data/"+f).then(r=>r.text())));
+  H = parseWave(th); L = parseWave(tl);
+  PTA = tp.replace(/^﻿/,"").replace(/\r/g,"").split("\n").slice(1).filter(l=>l.trim()).map(l=>l.split(",").slice(1,4).map(Number));
+  FIXED = {flip:pearson(0,true,.30,.45).r, none:pearson(0,false,.30,.45).r, wide:pearson(6.9,true,.25,.46).r};
+  const num = (id,key)=>document.querySelector(id).addEventListener("input",e=>{ st[key]=+e.target.value; draw(); });
+  num("#sh","shift"); num("#t0","t0"); num("#t1","t1"); num("#bins","bins");
+  document.querySelector("#flip").onchange = e=>{ st.flip=e.target.checked; draw(); };
+  document.querySelector("#comp").onchange = e=>{ st.comp=+e.target.value; draw(); };
+  document.querySelector("#pPaper").onclick = ()=>preset({shift:6.9,flip:true,t0:.30,t1:.45});
+  document.querySelector("#pNone").onclick = ()=>preset({shift:0,flip:false,t0:.30,t1:.45});
+  document.querySelector("#pFlip").onclick = ()=>preset({shift:0,flip:true,t0:.30,t1:.45});
+  document.querySelector("#pShift").onclick = ()=>preset({shift:6.9,flip:false,t0:.30,t1:.45});
+  document.querySelector("#pWide").onclick = ()=>preset({shift:6.9,flip:true,t0:.25,t1:.46});
+  document.querySelector("#pBest").onclick = ()=>preset({shift:+bestShift(st.flip,st.t0,st.t1).shift.toFixed(1)});
+  draw();
+  const hs = await Promise.all(FILES.map(f=>sha8("data/"+f)));
+  document.querySelector("#hashes").textContent = FILES.map((f,i)=>`${f} ${hs[i]}`).join(" · ");
+  Lab.notebook("#note","lab08",Lab.NOTE("H를 6.9 ms 앞당기고 부호를 뒤집으면 L과 겹치는가? 조건 하나를 빼면 r은 어떻게 변하나?"));
+})();
+</script>
+</body>
+</html>

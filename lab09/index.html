@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>341개 목록에서 표본을 직접 고르기 · 우주 리서치 실습 09</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&family=Noto+Serif+KR:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>:root{--ch:#B8475E;--ch-tint:#F6E6EA}</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../index.html">우주 리서치 · 실습</a><span class="chap">9장 작은 붉은 점</span></div></header>
+<main class="wrap">
+
+<div class="hero">
+ <div class="kick">직접 해보기 07</div>
+ <h1>341개 목록에서 표본을 직접 고르기</h1>
+ <div class="meta">약 20분 · 브라우저에서 코드 없이 · Python 선택</div>
+ <p class="lede">코체브스키 연구진이 공개한 341개 목록을 연다. 한 줄이 대상 하나이고, 적색편이와 그 측정 방법(분광 1, 광도 0), 4.44마이크로미터 밝기(mag444, 작을수록 밝다)가 들어 있다. 밝기 조건 하나를 거는 결정이 표본을 어떻게 바꾸는지 직접 눈금을 돌려 확인한다.</p>
+</div>
+
+<section>
+ <h2><span class="n">1</span>출처부터 확인한다</h2>
+ <p class="sub">그래프보다 먼저 읽어야 할 것: 이 자료는 어디서, 무엇으로, 어떻게 만들어졌는가.</p>
+ <table class="prov">
+  <tr><td>자료</td><td>Kocevski, D. D. 외 (2025). 제임스웹으로 찾은 z&gt;4 작고 붉은 활동성 은하핵 후보 표(Table 3). ApJ 986, 126 · <a href="https://doi.org/10.3847/1538-4357/adbc7d">doi:10.3847/1538-4357/adbc7d</a> · 저자 저장소 <a href="https://github.com/dalekocevski/Kocevski24">dalekocevski/Kocevski24</a> (커밋 b47c187)</td></tr>
+  <tr><td>무엇인가</td><td>여러 제임스웹 조사(CEERS, PRIMER-UDS, NGDEEP 등)에서 모은 341개 목록. 무작위 표본이 아니고, 조사마다 면적과 깊이가 다르다.</td></tr>
+  <tr><td>이 페이지의 처리</td><td>원본 Table3.dat를 열 이름이 있는 CSV로 옮겼을 뿐 행을 거르거나 값을 바꾸지 않았다. 학술지 PDF는 zflag를 1=광도, 2=분광으로 적어 이 저장소판(0=광도, 1=분광)과 다르다. 실습의 숫자는 이 고정된 저장소판에 대한 것이다.</td></tr>
+  <tr><td>파일 지문</td><td class="mono" id="hashes">—</td></tr>
+ </table>
+</section>
+
+<section>
+ <h2><span class="n">2</span>목록을 직접 거른다</h2>
+ <p class="sub">mag444 한계를 움직여 본다. 조건은 ‘&lt;’이다. 한계와 같은 밝기는 남기지 않는다.</p>
+ <div class="controls">
+  <div class="ctl"><label for="lim">mag444 &lt; <span class="val" id="limv">26.5</span></label><input type="range" id="lim" min="24" max="29" step="0.1" value="26.5"></div>
+  <div class="ctl"><label>바로 가기</label><div class="seg" id="pre"><button data-l="26">26</button><button data-l="26.5" class="on">26.5</button><button data-l="27">27</button><button data-l="99">조건 없음</button></div></div>
+  <div class="ctl"><label>대상</label><div class="seg" id="meth"><button data-m="all" class="on">전체 341개</button><button data-m="spec">분광 적색편이만</button></div></div>
+ </div>
+ <div class="plot" id="plot"></div>
+ <p class="caption" id="cap"></p>
+ <table class="res" id="sum"></table>
+ <div style="overflow-x:auto"><table class="res" id="bins" style="margin-top:14px"></table></div>
+</section>
+
+<section>
+ <h2><span class="n">3</span>해 볼 일</h2>
+ <ol class="steps">
+  <li><span><b>분모부터 확인한다.</b> 전체 341개, 분광 39개인지 센다. 이후 모든 비율의 분모다. (‘조건 없음’을 누른다.)</span></li>
+  <li><span><b>밝기 조건을 건다.</b> mag444 &lt; 26.5만 남긴다. 몇 개가 남고 그중 분광은 몇 개인가? ‘같다’는 포함하지 않는다.</span></li>
+  <li><span><b>조건을 바꿔 본다.</b> 26과 27로 바꿔 대상 수를 표로 적는다.</span></li>
+  <li><span><b>분포를 비교한다.</b> 조건을 건 표본(색 막대)과 전체(회색 막대)를 나란히 본다. 어느 구간이 많이 빠지는가? 아래 표의 ‘남은 비율’을 읽는다.</span></li>
+  <li><span><b>기록을 남긴다.</b> 조건, 남은 수, 분모, 파일의 지문(SHA-256)을 6절의 연구 노트에 적는다.</span></li>
+ </ol>
+</section>
+
+<section>
+ <h2><span class="n">4</span>예상 결과와 비교한다</h2>
+ <p class="sub">책 9장 오른쪽 쪽의 숫자다. 조건을 바꿨다면 값이 달라지는 것이 정상이다. 무엇이 달라졌는지가 이 실습의 핵심이다.</p>
+ <div class="expect">
+  <h3>밝은 것만 남기면 표본이 가까운 쪽으로 쏠린다</h3>
+  <div id="cmp"></div>
+  <p class="note">비교 조건: mag444 &lt; 26.5, 대상 전체 341개. 책의 값은 이 조건에서 230개(분광 33개)가 남고, 26이면 175개(27개), 27이면 286개(37개)라는 것이다. 적색편이 중앙값은 전체 6.13, 통과 5.80, 빠진 111개 7.00이고 5–6 구간은 76%, 9–10 구간은 23%만 남는다.</p>
+ </div>
+ <h3 style="margin-top:22px;font-size:15px">이렇게 읽는다</h3>
+ <ul class="note">
+  <li>밝기 조건은 먼 대상을 더 많이 덜어 낸다. 같은 밝기의 천체라도 멀수록 어둡게 보이기 때문이다. 그래서 ‘밝은 표본에서 적색편이 5–6이 가장 많다’를 ‘그 시대에 작은 붉은 점이 가장 많았다’로 읽으면 안 된다. 표본을 고르는 조건이 분포의 모양을 함께 만든다.</li>
+  <li>33/230을 ‘블랙홀이 확인된 비율’로 쓸 수 없다. 이 열은 적색편이를 잰 방법일 뿐이다. 이 실습으로 질량을 계산하거나 산란 해석을 검증할 수도 없다.</li>
+ </ul>
+ <h3 style="margin-top:22px;font-size:15px">결과가 다르다면</h3>
+ <ul class="note">
+  <li>대상 수가 다르면 조건을 ‘≤’로 걸지 않았는지, 숫자 열을 문자로 읽지 않았는지 본다.</li>
+  <li>그래도 다르면 내려받은 원본 Table3.dat의 SHA-256이 27372eee…711de인지 확인한다. 이 페이지의 catalog.csv는 그 변환본이라 지문이 다르다(4b7f690c).</li>
+ </ul>
+</section>
+
+<section>
+ <h2><span class="n">5</span>같은 계산을 코드로</h2>
+ <p class="sub">표준 라이브러리만 쓰므로 Python 3만 있으면 된다.</p>
+<pre>python3 analysis.py                          # 기본: mag444 &lt; 26.5
+python3 analysis.py --check                  # 책의 예상 결과와 비교
+python3 analysis.py --mag-limit 27           # 조건을 바꿔 보기
+python3 analysis.py --method spec            # 분광 적색편이 39개만 대상으로</pre>
+ <div class="files">
+  <a href="analysis.py" download><b>analysis.py</b><span>같은 계산 · 표준 라이브러리</span></a>
+  <a href="notebook.ipynb" download><b>notebook.ipynb</b><span>그림과 함께 따라 하기</span></a>
+  <a href="expected.json" download><b>expected.json</b><span>책의 예상 결과</span></a>
+  <a href="data/catalog.csv" download><b>data/catalog.csv</b><span>341행 · 33 KB</span></a>
+  <a href="data/Kocevski24.Table3.dat" download><b>data/Kocevski24.Table3.dat</b><span>원본 표</span></a>
+  <a href="data/provenance.json" download><b>data/provenance.json</b><span>출처·처리 기록</span></a>
+ </div>
+</section>
+
+<section>
+ <h2><span class="n">6</span>연구 노트</h2>
+ <p class="sub">질문은 좁게, 선택과 결과는 따로. 다른 사람이 똑같이 다시 할 수 있게 적는다.</p>
+ <div id="note"></div>
+</section>
+
+<section>
+ <h2>다음 걸음</h2>
+ <p>같은 조건을 조사 영역별(CEERS, PRIMER-UDS, NGDEEP 등)로 나눠 적용해 보자. 영역마다 남는 비율이 다르다면, 그 차이가 하늘의 차이인지 관측 깊이의 차이인지 먼저 따져 기록해 두자. CSV의 <span class="mono">survey</span> 열을 쓰면 된다.</p>
+</section>
+</main>
+<footer><div class="wrap">《우주 리서치》 9장 「작은 붉은 점」의 실습 · 자료 이용 조건은 각 출처를 따른다.</div></footer>
+
+<script src="../assets/lab.js"></script>
+<script>
+const BINS = [2,3,4,5,6,7,8,9,10,11];
+const EXP = {n26:175, s26:27, n265:230, s265:33, n27:286, s27:37, ma:6.13, mk:5.80, md:7.00, p5:76, p9:23};
+const state = {lim:26.5, meth:"all"};
+let rows = [];
+
+async function sha8(url){
+  const buf = await (await fetch(url)).arrayBuffer();
+  if (!crypto.subtle) return "—";
+  const h = await crypto.subtle.digest("SHA-256", buf);
+  return [...new Uint8Array(h)].slice(0,4).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+const median = v => { v=[...v].sort((a,b)=>a-b); const n=v.length; return n? (n%2? v[(n-1)/2] : (v[n/2-1]+v[n/2])/2) : null; };
+function analyse(lim, meth){
+  const base = rows.filter(r=>meth==="all" || r.flag===1);
+  const kept = base.filter(r=>r.mag<lim), out = base.filter(r=>!(r.mag<lim));
+  const bins = BINS.map(b=>{
+    const a = base.filter(r=>Math.floor(r.z)===b).length, k = kept.filter(r=>Math.floor(r.z)===b).length;
+    return {b, all:a, kept:k, pct:a? Math.round(100*k/a) : null};
+  });
+  return {base, kept, out, bins, spec:kept.filter(r=>r.flag===1).length,
+          ma:median(base.map(r=>r.z)), mk:median(kept.map(r=>r.z)), md:median(out.map(r=>r.z))};
+}
+function draw(){
+  const a = analyse(state.lim, state.meth);
+  const maxn = Math.max(...a.bins.map(x=>x.all));
+  const vl = [];
+  if (a.mk!=null && a.out.length) { vl.push({x:a.mk, label:"남은 것 중앙값 "+Lab.fmt(a.mk,2), color:"#B8475E"}); vl.push({x:a.md, label:"빠진 것 "+Lab.fmt(a.md,2), color:"#D9733D"}); }
+  Lab.plot("#plot", {
+    series:[
+      {type:"bars", x:BINS.map(b=>b+.5), y:a.bins.map(x=>x.all), color:"#B9B3A6", barWidth:.82, opacity:.85},
+      {type:"bars", x:BINS.map(b=>b+.5), y:a.bins.map(x=>x.kept), color:"#B8475E", barWidth:.82, opacity:.95}],
+    xmin:2, xmax:12, ymin:0, ymax:Math.ceil(maxn/20)*20+10, xticks:10, vlines:vl,
+    xlabel:"적색편이 z (구간 [z, z+1))", ylabel:"대상 수 (회색: 전체 · 색: 조건을 통과)"
+  });
+  const tgt = state.meth==="all" ? "전체" : "분광 적색편이만";
+  document.querySelector("#cap").textContent = `${tgt} ${a.base.length}개 중 mag444 < ${Lab.fmt(state.lim,1)}를 통과한 것 ${a.kept.length}개(색 막대). 목록의 줄 수일 뿐 시대별 실제 천체 수가 아니다.`;
+  document.querySelector("#sum").innerHTML =
+    `<tr><th>항목</th><th>값</th></tr>
+     <tr><td>분모(대상)</td><td class="num">${a.base.length}</td></tr>
+     <tr><td>남은 수 (그중 분광)</td><td class="num">${a.kept.length} (${a.spec})</td></tr>
+     <tr><td>빠진 수</td><td class="num">${a.out.length}</td></tr>
+     <tr><td>적색편이 중앙값: 전체 / 남은 것 / 빠진 것</td><td class="num">${Lab.fmt(a.ma,2)} / ${Lab.fmt(a.mk,2)} / ${Lab.fmt(a.md,2)}</td></tr>`;
+  document.querySelector("#bins").innerHTML =
+    `<tr><th>적색편이 구간</th>${a.bins.map(x=>`<th>${x.b}–${x.b+1}</th>`).join("")}</tr>
+     <tr><td>전체</td>${a.bins.map(x=>`<td class="num">${x.all}</td>`).join("")}</tr>
+     <tr><td>남음</td>${a.bins.map(x=>`<td class="num">${x.kept}</td>`).join("")}</tr>
+     <tr><td>남은 비율</td>${a.bins.map(x=>`<td class="num">${x.pct==null?"—":x.pct+"%"}</td>`).join("")}</tr>`;
+  // 비교표는 항상 책의 조건(전체 대상)으로 계산해 ‘당신의 값’을 보이되, 조건을 바꾸면 현재 조건 값을 쓴다.
+  const cur = a, c26 = analyse(26,"all"), c265 = analyse(26.5,"all"), c27 = analyse(27,"all");
+  const lim = state.lim, same = (x)=>Math.abs(lim-x)<1e-9 && state.meth==="all";
+  const rowsC = [
+    {label:`남은 수 · mag444<${Lab.fmt(lim,1)}`, mine:cur.kept.length, expected:EXP.n265, tol:0, digits:0},
+    {label:"그중 분광", mine:cur.spec, expected:EXP.s265, tol:0, digits:0},
+    {label:"mag444<26 남은 수 (분광)", mine:c26.kept.length, expected:EXP.n26, tol:0, digits:0},
+    {label:"mag444<27 남은 수 (분광 37)", mine:c27.kept.length, expected:EXP.n27, tol:0, digits:0},
+    {label:"중앙값 · 전체", mine:cur.ma, expected:EXP.ma, tol:.005, digits:2},
+    {label:"중앙값 · 통과", mine:cur.mk, expected:EXP.mk, tol:.005, digits:2},
+    {label:"중앙값 · 빠진 것", mine:cur.md, expected:EXP.md, tol:.005, digits:2},
+    {label:"z 5–6 남은 비율(%)", mine:cur.bins[3].pct, expected:EXP.p5, tol:0, digits:0},
+    {label:"z 9–10 남은 비율(%)", mine:cur.bins[7].pct, expected:EXP.p9, tol:0, digits:0}
+  ];
+  Lab.compare("#cmp", rowsC);
+}
+function setLim(v){ state.lim=v; document.querySelector("#lim").value=Math.min(29,Math.max(24,v)); document.querySelector("#limv").textContent = v>=99?"∞":Lab.fmt(v,1); draw(); }
+(async()=>{
+  const raw = await Lab.csv("data/catalog.csv");
+  rows = raw.map(r=>({survey:r.survey, z:+r.zbest, flag:+r.zflag, mag:+r.mag444}));
+  document.querySelector("#lim").oninput = e=>{ state.lim=+e.target.value; document.querySelector("#limv").textContent=Lab.fmt(state.lim,1);
+    document.querySelectorAll("#pre button").forEach(x=>x.classList.toggle("on", +x.dataset.l===state.lim)); draw(); };
+  document.querySelectorAll("#pre button").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll("#pre button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); setLim(+b.dataset.l); });
+  document.querySelectorAll("#meth button").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll("#meth button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); state.meth=b.dataset.m; draw(); });
+  draw();
+  const [h1,h2] = await Promise.all([sha8("data/catalog.csv"), sha8("data/Kocevski24.Table3.dat")]);
+  document.querySelector("#hashes").textContent = `catalog.csv ${h1} · Kocevski24.Table3.dat ${h2}`;
+  Lab.notebook("#note", "lab09", Lab.NOTE("mag444 한계를 바꾸면 남는 대상 수와 적색편이 분포는 어떻게 달라지나?"));
+})();
+</script>
+</body>
+</html>

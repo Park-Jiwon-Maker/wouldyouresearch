@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>연구 동향을 다시 계산하기 · 우주 리서치 실습 00</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&family=Noto+Serif+KR:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>:root{--ch:#1C2340;--ch-tint:#E3E5EF}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ch:#9AA6E0;--ch-tint:#23273A}}
+table.all{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
+table.all th{text-align:left;font-size:12px;color:var(--grey);border-bottom:1px solid var(--ink);padding:6px 8px 6px 0;font-weight:700}
+table.all td{padding:6px 8px 6px 0;border-bottom:1px solid var(--hair);font-variant-numeric:tabular-nums}
+table.all td.num{font-family:ui-monospace,Menlo,monospace;text-align:right}
+table.all th.num{text-align:right}
+table.all tr.pick td{background:var(--ch-tint);font-weight:700}
+table.all tr[data-id]{cursor:pointer}
+.tablewrap{overflow-x:auto}
+.query{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:var(--ch-tint);padding:6px 10px;margin:8px 0 0;word-break:break-word}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../index.html">우주 리서치 · 실습</a><span class="chap">덤 · 서문의 연구 동향</span></div></header>
+<main class="wrap">
+
+<div class="hero">
+ <div class="kick">직접 해보기 00</div>
+ <h1>연구 동향을 다시 계산하기</h1>
+ <div class="meta">약 15분 · 브라우저에서 코드 없이 · Python 선택</div>
+ <p class="lede">이 서문의 그래프가 어떻게 만들어졌는지 직접 확인한다. 주제별 연도별 논문 기록 수를 담은 표 하나와, 같은 기간 천문·우주과학 전체의 기록 수가 있다. 숫자를 의심하는 가장 좋은 방법은 다시 계산해 보는 것이다.</p>
+</div>
+
+<section>
+ <h2><span class="n">1</span>출처부터 확인한다</h2>
+ <p class="sub">그래프보다 먼저 읽어야 할 것: 이 숫자는 무엇을 센 것이고, 어디까지가 센 범위인가.</p>
+ <table class="prov">
+  <tr><td>자료</td><td>OpenAlex 학술 기록 데이터베이스(<a href="https://openalex.org">openalex.org</a>)에서 이 책의 동향 분석을 위해 센 집계표. 2026년 10월 22일 동결본. OpenAlex 자료는 CC0로 공개된다.</td></tr>
+  <tr><td>무엇을 쟀나</td><td>주제마다 정한 검색식(제목·초록 등)에 걸리는 논문 기록의 연도별 건수. 23개 주제 × 2021–2025년. 검색식은 아래에서 주제를 고르면 보인다.</td></tr>
+  <tr><td>분모</td><td>같은 기간 ‘과학 19개 주제군’ 전체의 기록 수(2021–2025년 연도별). 우주잔해처럼 공학 주제를 포함한 한 주제만 공학을 더한 분모를 쓴다.</td></tr>
+  <tr><td>이 페이지의 처리</td><td>원 집계표에서 연도별 건수 열만 옮겼다. 증가율·비중은 이 페이지가 연도별 건수에서 다시 계산한다. 검색식은 쉼표와 따옴표가 많아 별도 파일(queries.json)에 두었다. 2026년은 아직 끝나지 않은 해라 비교에서 뺐다.</td></tr>
+  <tr><td>파일 지문</td><td class="mono" id="hashes">—</td></tr>
+ </table>
+</section>
+
+<section>
+ <h2><span class="n">2</span>표를 직접 본다</h2>
+ <p class="sub">주제, 비교할 두 기간, 분모를 바꿔 본다. 아래 표의 줄을 눌러도 주제가 바뀐다.</p>
+ <div class="controls">
+  <div class="ctl"><label for="topic">주제</label><select id="topic"></select></div>
+  <div class="ctl"><label for="per">두 기간</label>
+   <select id="per">
+    <option value="2021,2022|2024,2025">2021–22년 → 2024–25년 (책)</option>
+    <option value="2021|2025">2021년 → 2025년</option>
+    <option value="2022,2023|2024,2025">2022–23년 → 2024–25년</option>
+   </select></div>
+  <div class="ctl"><label for="den">분모</label>
+   <select id="den">
+    <option value="auto">책과 같은 분모</option>
+    <option value="science">과학 19개 주제군</option>
+    <option value="all">공학 포함</option>
+   </select></div>
+  <div class="ctl"><label>그래프</label><div class="seg" id="mode"><button data-m="idx" class="on">2021=1로 맞춤</button><button data-m="raw">건수 그대로</button></div></div>
+ </div>
+ <div class="query" id="query"></div>
+ <div class="plot" id="plot"></div>
+ <p class="caption" id="cap"></p>
+ <table class="res" id="res"></table>
+ <h3 style="margin:22px 0 0;font-size:15px">23개 주제를 한꺼번에</h3>
+ <div class="tablewrap"><table class="all" id="all"></table></div>
+</section>
+
+<section>
+ <h2><span class="n">3</span>해 볼 일</h2>
+ <ol class="steps">
+  <li><span><b>표를 연다.</b> 열 이름을 확인한다. 연도별 건수, 두 기간의 합계, 검색식이 어느 열에 있는가?</span></li>
+  <li><span><b>증가율을 계산한다.</b> 관심 있는 주제 하나를 골라 (2024+2025)÷(2021+2022)−1을 계산한다. 서문 그래프의 막대와 같은가?</span></li>
+  <li><span><b>기준선과 비교한다.</b> 같은 방법으로 전체 분모의 증가율을 계산한다(56,694 → 65,001). 고른 주제는 전체보다 빠른가?</span></li>
+  <li><span><b>비중으로 바꿔 본다.</b> 각 기간의 주제 건수를 전체 건수로 나눈다. 건수는 늘었는데 비중은 그대로인 주제가 있는가?</span></li>
+  <li><span><b>스스로 묻는다.</b> ‘작은 붉은 점’처럼 2021년 값이 0인 주제의 증가율은 어떻게 써야 할까? 제목 검색이 놓치는 논문은 무엇일까?</span></li>
+ </ol>
+</section>
+
+<section>
+ <h2><span class="n">4</span>예상 결과와 비교한다</h2>
+ <p class="sub">책 서문 오른쪽 쪽의 숫자다. 기간이나 분모를 바꿨다면 값이 달라지는 것이 정상이다. 무엇이 달라졌는지가 이 실습의 핵심이다.</p>
+ <div class="expect">
+  <h3>늘어난 것과 비중이 커진 것은 다르다</h3>
+  <div id="cmp"></div>
+  <p class="note">비교 조건: 2021–22년 → 2024–25년, 분모는 과학 19개 주제군(책과 같은 분모). 외계행성 대기 연구의 건수는 늘었지만 전체가 함께 늘어서 비중은 거의 변하지 않았다. 중력파 연구는 건수와 비중이 함께 커졌다. ‘늘었다’는 말만으로는 이 둘을 구별할 수 없다.</p>
+  <p class="note">작은 붉은 점은 2021–2022년에 0건이어서 증가율을 계산할 수 없다. 이럴 때는 ‘몇 배 성장’이라고 쓰지 않고 연도별 건수(0, 0, 1, 15, 67)를 그대로 보여 주는 것이 정직하다.</p>
+ </div>
+ <h3 style="margin-top:22px;font-size:15px">결과가 다르다면</h3>
+ <ul class="note">
+  <li>증가율이 조금 다르면 두 기간의 연도 묶음을 확인한다. 2026년은 아직 끝나지 않은 해라 비교에서 뺐다.</li>
+  <li>비중이 크게 다르면 분모가 ‘과학 19개 주제군’ 전체인지 확인한다. 공학 분야를 섞으면 값이 달라진다.</li>
+  <li>Python 결과가 화면과 다르면 파일 지문(SHA256)부터 비교한다.</li>
+ </ul>
+</section>
+
+<section>
+ <h2><span class="n">5</span>같은 계산을 코드로</h2>
+ <p class="sub">표준 라이브러리만 쓰므로 Python 3만 있으면 된다.</p>
+<pre>python3 analysis.py                          # 책에 나온 세 주제와 전체 기준선
+python3 analysis.py --check                  # 책의 예상 결과와 비교
+python3 analysis.py --topic lrd              # 주제 하나 (id는 keyword_metrics.csv의 첫 열)
+python3 analysis.py --early 2022 2023 --recent 2024 2025 --denominator all</pre>
+ <div class="files">
+  <a href="analysis.py" download><b>analysis.py</b><span>같은 계산 · 표준 라이브러리</span></a>
+  <a href="notebook.ipynb" download><b>notebook.ipynb</b><span>그림과 함께 따라 하기</span></a>
+  <a href="expected.json" download><b>expected.json</b><span>책의 예상 결과</span></a>
+  <a href="data/keyword_metrics.csv" download><b>data/keyword_metrics.csv</b><span>주제별 연도별 건수 · 23행</span></a>
+  <a href="data/denominators.csv" download><b>data/denominators.csv</b><span>전체 분모 · 연도별</span></a>
+  <a href="data/queries.json" download><b>data/queries.json</b><span>주제별 검색식</span></a>
+  <a href="data/provenance.json" download><b>data/provenance.json</b><span>출처·처리 기록</span></a>
+ </div>
+</section>
+
+<section>
+ <h2><span class="n">6</span>연구 노트</h2>
+ <p class="sub">질문은 좁게, 선택과 결과는 따로. 다른 사람이 똑같이 다시 할 수 있게 적는다.</p>
+ <div id="note"></div>
+</section>
+
+<section>
+ <h2>다음 걸음</h2>
+ <p>관심 있는 다른 주제의 검색식을 만들어 <a href="https://openalex.org">오픈알렉스</a>에서 직접 세어 보자. 검색식과 날짜를 기록해 두면, 내년에 같은 계산을 다시 해서 무엇이 변했는지 비교할 수 있다.</p>
+</section>
+</main>
+<footer><div class="wrap">《우주 리서치》 서문 「우주를 묻다」의 실습 · 자료 이용 조건은 각 출처를 따른다.</div></footer>
+
+<script src="../assets/lab.js"></script>
+<script>
+const YEARS = [2021, 2022, 2023, 2024, 2025];
+const state = {topic:"exoplanet_atmosphere", early:[2021,2022], recent:[2024,2025], den:"auto", mode:"idx"};
+let topics = [], dens = {}, queries = {};
+
+async function sha8(url){
+  const buf = await (await fetch(url)).arrayBuffer();
+  if (!crypto.subtle) return "—";
+  const h = await crypto.subtle.digest("SHA-256", buf);
+  return [...new Uint8Array(h)].slice(0,4).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+const sum = (o, ys) => ys.reduce((s,y)=>s+o[y], 0);
+const kindOf = (t, den) => den === "auto" ? (t.corpus === "all24" ? "all" : "science") : den;
+function calc(t, early, recent, den){
+  const kind = kindOf(t, den), D = dens[kind];
+  const e = sum(t, early), r = sum(t, recent), de = sum(D, early), dr = sum(D, recent);
+  return {kind, e, r, de, dr, growth: e ? (r/e-1)*100 : null, dgrowth: (dr/de-1)*100,
+          se: e/de*100, sr: r/dr*100, dpp: r/dr*100 - e/de*100};
+}
+const pp = v => { const r = Math.round(v*100)/100; return (r>0?"+":"")+Lab.fmt(Math.abs(r)<1e-9?0:r,2)+"%p"; };
+function draw(){
+  const t = topics.find(x=>x.id===state.topic);
+  const c = calc(t, state.early, state.recent, state.den);
+  const D = dens[c.kind];
+  document.querySelector("#query").textContent = "검색식: " + (queries[t.id] || "—") + "  ·  묶음: " + t.corpus;
+  let mode = state.mode, note = "";
+  if (mode === "idx" && !t[2021]) { mode = "raw"; note = " 2021년 값이 0이라 ‘2021=1로 맞춤’을 쓸 수 없어 건수 그대로 보여 준다."; }
+  const topicY = YEARS.map(y=>t[y]), denY = YEARS.map(y=>D[y]);
+  const idx = a => a.map(v=>v/a[0]);
+  const ys1 = mode==="idx" ? idx(topicY) : topicY, ys2 = mode==="idx" ? idx(denY) : denY;
+  if (mode === "idx") {
+    Lab.plot("#plot", {series:[
+      {x:YEARS, y:ys2, color:"#6F6B63", dash:"5 4", width:1.8, label:"전체(분모)"},
+      {x:YEARS, y:ys1, color:getComputedStyle(document.documentElement).getPropertyValue("--ch").trim(), width:2.4, label:t.label_ko.slice(0,12)},
+      {x:YEARS, y:ys1, color:getComputedStyle(document.documentElement).getPropertyValue("--ch").trim(), type:"dots", r:3.6, opacity:1}
+    ], xmin:2020.7, xmax:2025.3, xticks:4, xfmt:v=>Number.isInteger(v)?String(v):"",
+    ymin:Math.min(0.8, ...ys1, ...ys2)*0.97, ymax:Math.max(1.25, ...ys1, ...ys2)*1.05, xlabel:"연도", ylabel:"2021년 값=1", height:320});
+  } else {
+    Lab.plot("#plot", {series:[
+      {x:YEARS, y:ys1, color:getComputedStyle(document.documentElement).getPropertyValue("--ch").trim(), width:2.4, label:t.label_ko.slice(0,14)},
+      {x:YEARS, y:ys1, color:getComputedStyle(document.documentElement).getPropertyValue("--ch").trim(), type:"dots", r:3.6, opacity:1}
+    ], xmin:2020.7, xmax:2025.3, xticks:4, xfmt:v=>Number.isInteger(v)?String(v):"",
+    ymin:0, ymax:Math.max(...ys1,1)*1.15, xlabel:"연도", ylabel:"논문 기록 수(건)", height:320});
+  }
+  document.querySelector("#cap").textContent =
+    `${t.label_ko}. 두 기간: ${state.early.join("·")}년 → ${state.recent.join("·")}년, 분모: ${c.kind==="all"?"공학 포함":"과학 19개 주제군"}.` + note +
+    (mode==="idx" ? " 점선은 같은 기간 전체(분모)다." : "");
+  const g = v => v==null ? "계산 불가(기준 0건)" : (v>=0?"+":"")+Lab.fmt(v,1)+"%";
+  document.querySelector("#res").innerHTML =
+    "<tr><th></th><th>이전 기간</th><th>이후 기간</th><th>증가율</th></tr>" +
+    `<tr><td>전체(분모)</td><td class="num">${Lab.fmt(c.de,0)}건</td><td class="num">${Lab.fmt(c.dr,0)}건</td><td class="num">${g(c.dgrowth)}</td></tr>` +
+    `<tr><td>${t.label_ko}</td><td class="num">${Lab.fmt(c.e,0)}건</td><td class="num">${Lab.fmt(c.r,0)}건</td><td class="num">${g(c.growth)}</td></tr>` +
+    `<tr><td>전체에서 차지하는 비중</td><td class="num">${Lab.fmt(c.se,2)}%</td><td class="num">${Lab.fmt(c.sr,2)}%</td><td class="num">${pp(c.dpp)}</td></tr>`;
+  let h = '<tr><th>주제</th><th class="num">증가율</th><th class="num">비중 변화</th><th class="num">이후 건수</th></tr>';
+  for (const x of topics){
+    const k = calc(x, state.early, state.recent, state.den);
+    h += `<tr data-id="${x.id}"${x.id===state.topic?' class="pick"':''}><td>${x.label_ko}</td><td class="num">${g(k.growth)}</td><td class="num">${pp(k.dpp)}</td><td class="num">${Lab.fmt(k.r,0)}</td></tr>`;
+  }
+  const tb = document.querySelector("#all"); tb.innerHTML = h;
+  tb.querySelectorAll("tr[data-id]").forEach(tr=>tr.onclick=()=>{state.topic=tr.dataset.id; document.querySelector("#topic").value=state.topic; draw(); document.querySelector("#plot").scrollIntoView({block:"center",behavior:"smooth"});});
+  // 책 조건 비교: 주제는 고정, 기간·분모는 현재 조작판 값
+  const B = id => calc(topics.find(x=>x.id===id), state.early, state.recent, state.den);
+  const ex = B("exoplanet_atmosphere"), gw = B("gravitational_wave"), lr = B("lrd");
+  Lab.compare("#cmp", [
+    {label:"전체 기준선 · 이전 기간(건)", mine:ex.de, expected:56694, tol:0, digits:0},
+    {label:"전체 기준선 · 이후 기간(건)", mine:ex.dr, expected:65001, tol:0, digits:0},
+    {label:"전체 기준선 · 증가율", mine:ex.dgrowth, expected:14.7, tol:.05, digits:1, unit:"%"},
+    {label:"외계행성 대기 · 이후 기간(건)", mine:ex.r, expected:128, tol:0, digits:0},
+    {label:"외계행성 대기 · 증가율", mine:ex.growth, expected:16.4, tol:.05, digits:1, unit:"%"},
+    {label:"외계행성 대기 · 비중 이전", mine:ex.se, expected:.19, tol:.005, digits:2, unit:"%"},
+    {label:"외계행성 대기 · 비중 이후", mine:ex.sr, expected:.20, tol:.005, digits:2, unit:"%"},
+    {label:"중력파 · 이후 기간(건)", mine:gw.r, expected:1956, tol:0, digits:0},
+    {label:"중력파 · 증가율", mine:gw.growth, expected:37.3, tol:.05, digits:1, unit:"%"},
+    {label:"중력파 · 비중 이전", mine:gw.se, expected:2.51, tol:.005, digits:2, unit:"%"},
+    {label:"중력파 · 비중 이후", mine:gw.sr, expected:3.01, tol:.005, digits:2, unit:"%"},
+    {label:"작은 붉은 점 · 이전 기간(건)", mine:lr.e, expected:0, tol:0, digits:0},
+    {label:"작은 붉은 점 · 이후 기간(건)", mine:lr.r, expected:82, tol:0, digits:0},
+  ]);
+}
+(async()=>{
+  const [rows, dr, q] = await Promise.all([Lab.csv("data/keyword_metrics.csv"), Lab.csv("data/denominators.csv"), Lab.json("data/queries.json")]);
+  topics = rows; queries = q;
+  dens = {science:{}, all:{}};
+  dr.forEach(r=>{dens.science[r.year]=r.science; dens.all[r.year]=r.all;});
+  const sel = document.querySelector("#topic");
+  sel.innerHTML = topics.map(t=>`<option value="${t.id}">${t.label_ko}</option>`).join("");
+  sel.value = state.topic;
+  sel.onchange = e=>{state.topic=e.target.value; draw();};
+  document.querySelector("#per").onchange = e=>{const [a,b]=e.target.value.split("|"); state.early=a.split(",").map(Number); state.recent=b.split(",").map(Number); draw();};
+  document.querySelector("#den").onchange = e=>{state.den=e.target.value; draw();};
+  document.querySelectorAll("#mode button").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll("#mode button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); state.mode=b.dataset.m; draw();});
+  draw();
+  const files = ["keyword_metrics.csv","denominators.csv"];
+  const hs = await Promise.all(files.map(f=>sha8(`data/${f}`)));
+  document.querySelector("#hashes").textContent = files.map((f,i)=>`${f} ${hs[i]}`).join(" · ");
+  Lab.notebook("#note", "lab00", Lab.NOTE("서문의 증가율 막대는 연도별 건수에서 다시 계산하면 같은가? 전체 분모보다 빠르게 늘어난 주제는 무엇인가?"));
+})();
+</script>
+</body>
+</html>

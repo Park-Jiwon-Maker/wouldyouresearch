@@ -1,0 +1,22 @@
+{
+ "lab": "01",
+ "title": "경보선을 어디에 그을까",
+ "book_pages": "1장 직접 해보기",
+ "conditions": {
+  "kind": "X",
+  "lead": 1,
+  "period": "1998–2024 (발행일 기준)",
+  "alarm_rule": "확률 ≥ 경보선이면 경보",
+  "pairing": "실제 달력 날짜로 짝짓고, 대상 날짜의 기록이 없으면 ‘없었다’로 채우지 않고 뺌"
+ },
+ "n": 9804,
+ "events": 253,
+ "always_no_accuracy_pct": 97.4,
+ "days_at_or_above_50": 51,
+ "days_exactly_50": 35,
+ "threshold_50": {"hit": 20, "false_alarm": 31, "miss": 233, "quiet": 9520},
+ "threshold_10": {"hit": 198, "false_alarm": 1598, "miss": 55, "quiet": 7953},
+ "persistence": {"hit": 54, "false_alarm": 199, "miss": 199},
+ "sha256_8": {"forecast_pairs.csv": "f5f28df1"},
+ "summary": "경보선을 50%에서 10%로 내리면 놓친 날은 233일에서 55일로 줄고, 괜히 울린 날은 31일에서 1,598일로 는다. 지속 예보는 54/199/199."
+}

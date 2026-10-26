@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>펄서 후보 분류기 시험하기 · 우주 리서치 실습 07</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&family=Noto+Serif+KR:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>:root{--ch:#5C5FB0;--ch-tint:#E7E7F4}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0;border-top:1px solid var(--ink);margin:6px 0 4px}
+.tile{padding:10px 12px 10px 0;border-bottom:1px solid var(--hair)}
+.tile b{display:block;font-size:26px;font-weight:300;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums}
+.tile span{font-size:12.5px;color:var(--grey)}
+.tile.good b{color:var(--ch)}.tile.bad b{color:var(--orange)}
+.flag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border:1px solid var(--orange);color:var(--orange);margin-left:8px}
+.scroll{overflow-x:auto}
+.legend{display:flex;gap:18px;font-size:13px;color:var(--grey);margin:4px 0 0;flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:10px;margin-right:6px;vertical-align:baseline}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../index.html">우주 리서치 · 실습</a><span class="chap">7장 하늘의 자료</span></div></header>
+<main class="wrap">
+
+<div class="hero">
+ <div class="kick">직접 해보기 05</div>
+ <h1>펄서 후보 분류기 시험하기</h1>
+ <div class="meta">약 30분 · 브라우저에서 코드 없이 · Python 선택</div>
+ <p class="lede">파크스 망원경의 실제 펄서 후보 17,898개로 분류기를 만들고 시험한다. 목표는 높은 점수가 아니다. 그 점수가 무엇을 뜻하는지 정직하게 말할 수 있게 되는 것이다. 이 페이지에는 학습이 끝난 점수가 들어 있고, 당신이 고르는 것은 ‘어디서 자를까’, 곧 문턱이다.</p>
+</div>
+
+<section>
+ <h2><span class="n">1</span>출처부터 확인한다</h2>
+ <p class="sub">그래프보다 먼저 읽어야 할 것: 이 자료는 어디서, 무엇으로, 어떻게 만들어졌는가.</p>
+ <table class="prov">
+  <tr><td>자료</td><td>HTRU2. Lyon, R. J. 외 HTRU 공동연구진, 파크스 전파망원경 관측. UCI <a href="https://doi.org/10.24432/C5DK6R">doi:10.24432/C5DK6R</a> · CC BY 4.0</td></tr>
+  <tr><td>무엇인가</td><td>후보 17,898행. 한 행은 접은 펄스 모양과 분산 측정 곡선에서 뽑은 여덟 숫자이고, 마지막 열은 사람이 붙인 정답이다(1=펄서). 원시 시계열이 아니다.</td></tr>
+  <tr><td>이 페이지의 처리</td><td>표는 그대로다. 파생 파일은 둘: <span class="mono">scores.csv</span>(행마다 묶음·정답·학습된 점수)와 <span class="mono">model.json</span>(평균·표준편차·가중치). 묶음은 펄서와 아닌 것을 따로 섞어 60/20/20, 시작값 20261023. 평균과 표준편차는 학습 묶음으로만 구했다.</td></tr>
+  <tr><td>알아 둘 것</td><td>행은 서로 다른 천체가 아니라 후보다. 같은 펄서가 여러 행에 나올 수 있고, 천체·시각·위치 식별자가 없어 천체 단위로 나눌 수 없다. 점수는 확률이 아니다.</td></tr>
+  <tr><td>파일 지문</td><td class="mono" id="hashes">—</td></tr>
+ </table>
+ <h3 style="margin:20px 0 6px;font-size:15px">표를 연다 · 첫 5행</h3>
+ <div class="scroll"><table class="res" id="head"></table></div>
+ <p class="caption" id="headcap"></p>
+</section>
+
+<section>
+ <h2><span class="n">2</span>문턱을 직접 움직여 본다</h2>
+ <p class="sub">점수가 문턱 이상이면 ‘펄서 후보로 남긴다’. 문턱을 올리면 잘못 남기는 것이 줄지만 진짜 펄서를 더 놓친다. 색 띠가 남기는 쪽이다.</p>
+ <div class="controls">
+  <div class="ctl"><label>보는 묶음</label><div class="seg" id="split"><button data-s="validation" class="on">검증 3,578행</button><button data-s="test">시험 3,582행</button></div></div>
+  <div class="ctl"><label for="th">문턱 <span class="val" id="thv">0.16</span></label><input type="range" id="th" min="0.01" max="0.99" step="0.01" value="0.16"></div>
+  <div class="ctl"><label for="tr">검증에서 지킬 재현율</label>
+   <select id="tr"><option value="0.85">85% 이상</option><option value="0.9" selected>90% 이상</option><option value="0.95">95% 이상</option><option value="0.99">99% 이상</option></select></div>
+  <div class="ctl"><label>바로 가기</label><div class="seg"><button id="bPick">검증에서 고른 문턱</button><button id="bHalf">0.5</button></div></div>
+ </div>
+ <p class="note" id="rule" style="margin:0 0 8px"></p>
+ <div class="tiles" id="tiles"></div>
+ <div class="plot" id="plot"></div>
+ <div class="legend"><span><i style="background:var(--ch)"></i>펄서</span><span><i style="background:var(--grey)"></i>펄서 아님</span><span>색 띠 = 남기는 쪽</span></div>
+ <p class="caption" id="cap"></p>
+ <table class="res" id="mt"></table>
+ <h3 style="margin:22px 0 6px;font-size:15px">놓친 펄서 <span id="missn"></span></h3>
+ <div class="scroll"><table class="res" id="miss"></table></div>
+ <p class="caption">점수가 낮은 순 상위 12행. 여덟 숫자는 원본 열 순서(1–8)다.</p>
+</section>
+
+<section>
+ <h2><span class="n">3</span>해 볼 일</h2>
+ <ol class="steps">
+  <li><span><b>표를 연다.</b> 한 행이 후보 하나라는 것, 마지막 열이 사람이 붙인 정답이라는 것을 확인한다. 펄서는 몇 행인가? (위 표와 지문 아래의 요약)</span></li>
+  <li><span><b>나눈다.</b> 묶음 행 수가 10,738 / 3,578 / 3,582인지 본다. 평균과 표준편차를 전체가 아니라 학습 묶음으로만 구했다는 점이 왜 중요한지 한 줄로 적는다.</span></li>
+  <li><span><b>기준선을 잰다.</b> 시험 묶음을 고르고 아래 표의 ‘모두 아님’ 정확도와 재현율을 적어 둔다. 분류기의 정확도와 얼마나 차이 나는가?</span></li>
+  <li><span><b>문턱을 고른다.</b> <b>검증</b> 묶음에서 슬라이더를 움직여, 펄서를 90% 이상 남기는 가장 높은 문턱을 찾는다. ‘검증에서 고른 문턱’ 단추와 같은 값인가? 고른 이유를 한 줄로 적는다.</span></li>
+  <li><span><b>시험 묶음을 한 번 연다.</b> 고른 문턱 그대로 <b>시험</b>을 눌러 남김·놓침·잘못 남김과 재현율·정밀도를 기록한다. 그 뒤 문턱을 바꿔 보는 것은 모두 ‘사후 탐색’이다. 화면에도 표시된다.</span></li>
+ </ol>
+</section>
+
+<section>
+ <h2><span class="n">4</span>예상 결과와 비교한다</h2>
+ <p class="sub">책 7장 오른쪽 쪽의 숫자다. ‘시험, 현재 문턱’ 항목은 슬라이더를 따라 바뀐다. 문턱을 바꿨다면 다른 것이 정상이다. 무엇이 달라졌는지가 이 실습의 핵심이다.</p>
+ <div class="expect">
+  <h3>시험 묶음의 펄서 329개 중 287개를 남겼고, 남긴 345개 중 58개는 펄서가 아니었다</h3>
+  <div id="cmp"></div>
+  <p class="note">비교 조건: 문턱 0.16(검증 재현율 90% 기준으로 고른 값), 시험 묶음 3,582행. 위쪽 세 행은 슬라이더와 무관하게 ‘고르는 규칙’의 결과이고, 아래쪽은 현재 문턱을 시험 묶음에 적용한 결과다.</p>
+  <p class="note"><b>읽기.</b> 정확도 97.2%는 아무것도 하지 않는 90.8%보다 6.4%포인트 높을 뿐이다. 이 분류기가 한 일은 ‘펄서 42개를 놓치는 대신, 확인할 후보를 3,582개에서 345개로 줄였다’로 쓰는 편이 정직하다. 재현율은 검증의 90.8%에서 시험의 87.2%로 낮아졌다. 문턱을 검증 묶음에 맞춰 골랐고 펄서가 300여 개뿐이라 몇 개 차이로도 비율이 흔들린다. 같은 펄서가 여러 행에 나올 수 있으므로 이 숫자는 새 펄서를 찾는 능력이 아니라 이 표 안에서의 성적이다.</p>
+ </div>
+ <h3 style="margin-top:22px;font-size:15px">결과가 다르다면</h3>
+ <ul class="note">
+  <li>행 수가 10,738 / 3,578 / 3,582가 아니면 나누는 방식과 시작값을 확인한다. 전체 자료로 표준화하지 않았는지도 본다.</li>
+  <li>문턱이 0.16과 다르면 검증이 아니라 시험 묶음으로 문턱을 고르지 않았는지 확인한다.</li>
+  <li>Python 결과가 화면과 다르면 파일 지문(SHA256)부터 비교한다.</li>
+ </ul>
+</section>
+
+<section>
+ <h2><span class="n">5</span>같은 계산을 코드로</h2>
+ <p class="sub">표준 라이브러리만 쓰므로 Python 3만 있으면 된다. 처음부터 다시 학습해 보는 <span class="mono">--retrain</span>만 NumPy가 필요하다.</p>
+<pre>python3 analysis.py                         # 검증에서 문턱을 고르고 시험 결과를 본다
+python3 analysis.py --check                 # 책의 예상 결과와 비교
+python3 analysis.py --threshold 0.5         # 다른 문턱(사후 탐색)
+python3 analysis.py --target-recall 0.95    # 검증 재현율 목표 바꾸기
+python3 analysis.py --retrain               # 분할·학습부터 다시(NumPy)</pre>
+ <div class="files">
+  <a href="analysis.py" download><b>analysis.py</b><span>같은 계산 · 표준 라이브러리</span></a>
+  <a href="notebook.ipynb" download><b>notebook.ipynb</b><span>그림과 함께 따라 하기</span></a>
+  <a href="expected.json" download><b>expected.json</b><span>책의 예상 결과</span></a>
+  <a href="data/HTRU_2.csv" download><b>data/HTRU_2.csv</b><span>원본 · 17,898행 · 1.7MB</span></a>
+  <a href="data/scores.csv" download><b>data/scores.csv</b><span>묶음·정답·점수</span></a>
+  <a href="data/model.json" download><b>data/model.json</b><span>평균·표준편차·가중치</span></a>
+  <a href="data/provenance.json" download><b>data/provenance.json</b><span>출처·처리 기록</span></a>
+ </div>
+</section>
+
+<section>
+ <h2><span class="n">6</span>연구 노트</h2>
+ <p class="sub">질문은 좁게, 선택과 결과는 따로. 고른 문턱과 그 이유, 시험을 연 뒤에 한 일을 구분해 적는다.</p>
+ <div id="note"></div>
+</section>
+
+<section>
+ <h2>다음 걸음</h2>
+ <p>놓친 펄서 42개의 여덟 숫자를 표로 저장해, 남긴 펄서와 어느 숫자가 다른지 비교해 보자. 그 차이를 세 문장으로 적고, 무엇을 아직 모르는지도 한 문장 덧붙인다. (위 ‘놓친 펄서’ 표는 시험 묶음 · 문턱 0.16에서 그 42개를 보여 준다.)</p>
+</section>
+</main>
+<footer><div class="wrap">《우주 리서치》 7장 「하늘의 자료」의 실습 · 자료 HTRU2는 CC BY 4.0, 이용 조건은 각 출처를 따른다.</div></footer>
+
+<script src="../assets/lab.js"></script>
+<script>
+const state = {split:"validation", t:0.16, target:0.9};
+let rows = [];          // {i, split, y, s}
+let raw = [];           // 원본 행 8개 숫자
+function cm(split, t){
+  let tp=0, fp=0, fn=0, tn=0;
+  for (const r of rows) if (r.split===split){
+    const k = r.s>=t;
+    if (r.y) { if (k) tp++; else fn++; } else { if (k) fp++; else tn++; }
+  }
+  const n=tp+fp+fn+tn;
+  return {tp,fp,fn,tn,n,kept:tp+fp,pos:tp+fn,recall:tp/(tp+fn),precision:tp+fp?tp/(tp+fp):null,accuracy:(tp+tn)/n};
+}
+function pick(target){
+  let best = 0.01;
+  for (let k=1;k<=99;k++){ const t=k/100; if (cm("validation",t).recall >= target-1e-12) best=t; }
+  return best;
+}
+const pct = (v,d=1)=> v==null ? "해당 없음" : (v*100).toFixed(d)+"%";
+async function sha8(url){
+  const buf = await (await fetch(url)).arrayBuffer();
+  if (!crypto.subtle) return "—";
+  const h = await crypto.subtle.digest("SHA-256", buf);
+  return [...new Uint8Array(h)].slice(0,4).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function tile(label, value, cls){ return `<div class="tile ${cls||""}"><b>${value}</b><span>${label}</span></div>`; }
+function draw(){
+  const t = state.t, picked = pick(state.target);
+  document.querySelector("#thv").textContent = t.toFixed(2);
+  const m = cm(state.split, t);
+  const post = state.split==="test" && Math.abs(t-picked)>1e-9;
+  document.querySelector("#rule").innerHTML =
+    `검증 묶음에서 재현율 ${pct(state.target,0)} 이상을 남기는 가장 높은 문턱 = <b>${picked.toFixed(2)}</b>` +
+    (state.split==="test" ? (post ? '<span class="flag">사후 탐색 · 시험을 보고 바꾼 문턱</span>' : '<span class="flag" style="color:var(--ch);border-color:var(--ch)">검증에서 고른 문턱</span>') : "");
+  document.querySelector("#tiles").innerHTML =
+    tile(`남긴 진짜 펄서 (찾음) / ${m.pos}`, m.tp.toLocaleString(), "good") +
+    tile("놓친 펄서", m.fn.toLocaleString(), "bad") +
+    tile("잘못 남긴 것 (펄서 아님)", m.fp.toLocaleString(), "bad") +
+    tile(`확인할 후보 (묶음 ${m.n.toLocaleString()}행 중)`, m.kept.toLocaleString()) +
+    tile("재현율 (찾음 ÷ 전체 펄서)", pct(m.recall)) +
+    tile("정밀도 (찾음 ÷ 남김)", pct(m.precision));
+  // 히스토그램: 점수 0.02 간격, 로그 눈금
+  const bins = 50, cp = Array(bins).fill(0), cn = Array(bins).fill(0);
+  for (const r of rows) if (r.split===state.split){ const b=Math.min(bins-1, Math.floor(r.s*bins)); (r.y?cp:cn)[b]++; }
+  const xp=[],yp=[],xn=[],yn=[];
+  for (let b=0;b<bins;b++){ const c=(b+.5)/bins; if (cp[b]){xp.push(c+.004);yp.push(cp[b]);} if (cn[b]){xn.push(c-.004);yn.push(cn[b]);} }
+  Lab.plot("#plot", {
+    series:[{x:xn,y:yn,type:"bars",color:"#8a867d",barWidth:.0085,opacity:.9},{x:xp,y:yp,type:"bars",color:"#5C5FB0",barWidth:.0085,opacity:.95}],
+    xmin:0,xmax:1,ymin:.8,ymax:Math.max(...yn,...yp)*1.6,logy:true,xticks:10,
+    bands:[{x0:t,x1:1,label:"남김"}],vlines:[{x:t,label:"문턱 "+t.toFixed(2),color:"#D9733D"}],
+    xlabel:"분류 점수 (0.02 간격)", ylabel:"행 수 (로그 눈금)", height:340
+  });
+  document.querySelector("#cap").textContent =
+    `${state.split==="validation"?"검증":"시험"} 묶음 ${m.n.toLocaleString()}행의 점수 분포. 문턱 ${t.toFixed(2)} 오른쪽이 남긴 후보다. 점수가 낮은 첫 칸에 펄서 아닌 행 대부분이 몰려 있다.`;
+  const base = (m.n-m.pos)/m.n;
+  document.querySelector("#mt").innerHTML =
+    "<tr><th></th><th>남김</th><th>거름</th><th>합계</th></tr>" +
+    `<tr><td>진짜 펄서</td><td class="num">${m.tp}</td><td class="num">${m.fn}</td><td class="num">${m.pos}</td></tr>` +
+    `<tr><td>펄서 아님</td><td class="num">${m.fp}</td><td class="num">${m.tn.toLocaleString()}</td><td class="num">${(m.fp+m.tn).toLocaleString()}</td></tr>` +
+    `<tr><td>정확도</td><td class="num" colspan="3">${pct(m.accuracy)} · 비교 기준 ‘모두 아님’: 정확도 ${pct(base)}, 재현율 0%</td></tr>`;
+  // 놓친 펄서
+  const missed = rows.filter(r=>r.split===state.split && r.y && r.s<t).sort((a,b)=>a.s-b.s);
+  document.querySelector("#missn").textContent = `(${state.split==="validation"?"검증":"시험"} · 문턱 ${t.toFixed(2)} · ${missed.length}개)`;
+  let h = "<tr><th>행</th><th>점수</th>" + [1,2,3,4,5,6,7,8].map(i=>`<th>열${i}</th>`).join("") + "</tr>";
+  for (const r of missed.slice(0,12)) h += `<tr><td class="num">${r.i}</td><td class="num">${r.s.toFixed(4)}</td>` + raw[r.i-1].map(v=>`<td class="num">${Lab.fmt(v,2)}</td>`).join("") + "</tr>";
+  document.querySelector("#miss").innerHTML = missed.length ? h : "<tr><td>놓친 펄서가 없다.</td></tr>";
+  // 비교
+  const v16 = cm("validation", picked), te16 = cm("test", picked), teNow = cm("test", t), half = cm("test", .5);
+  const baseT = (teNow.n-teNow.pos)/teNow.n;
+  Lab.compare("#cmp", [
+    {label:"검증에서 고른 문턱", mine:picked, expected:0.16, tol:.0001, digits:2},
+    {label:"검증 묶음: 남긴 펄서 수 (문턱 규칙대로, 책 297/327)", mine:v16.tp, expected:297, tol:0, digits:0},
+    {label:"시험 묶음 전체 펄서 수", mine:te16.pos, expected:329, tol:0, digits:0},
+    {label:"시험, 현재 문턱: 남긴 펄서", mine:teNow.tp, expected:287, tol:0, digits:0},
+    {label:"시험, 현재 문턱: 남긴 후보 전체", mine:teNow.kept, expected:345, tol:0, digits:0},
+    {label:"시험, 현재 문턱: 재현율", mine:teNow.recall*100, expected:87.2, tol:.05, digits:1, unit:"%"},
+    {label:"시험, 현재 문턱: 정밀도", mine:teNow.precision*100, expected:83.2, tol:.05, digits:1, unit:"%"},
+    {label:"시험, 현재 문턱: 정확도", mine:teNow.accuracy*100, expected:97.2, tol:.05, digits:1, unit:"%"},
+    {label:"모두 ‘아님’ 정확도", mine:baseT*100, expected:90.8, tol:.05, digits:1, unit:"%"},
+    {label:"시험, 문턱 0.5: 남긴 펄서 (254/329)", mine:half.tp, expected:254, tol:0, digits:0},
+    {label:"시험, 문턱 0.5: 잘못 남긴 것", mine:half.fp, expected:16, tol:0, digits:0}
+  ]);
+}
+function seg(id, fn){
+  document.querySelectorAll(`#${id} button`).forEach(b=>b.onclick=()=>{
+    document.querySelectorAll(`#${id} button`).forEach(x=>x.classList.remove("on")); b.classList.add("on"); fn(b); draw();
+  });
+}
+function setT(v){ state.t=v; document.querySelector("#th").value=v; }
+(async()=>{
+  const [sc, rawText] = await Promise.all([Lab.csv("data/scores.csv"), fetch("data/HTRU_2.csv").then(r=>r.text())]);
+  rows = sc.map(r=>({i:r.row, split:r.split, y:r.label, s:r.score}));
+  raw = rawText.replace(/\r/g,"").split("\n").filter(l=>l.trim()).map(l=>l.split(",").map(Number));
+  const npos = raw.filter(r=>r[8]===1).length;
+  document.querySelector("#head").innerHTML = "<tr><th>행</th>" + [1,2,3,4,5,6,7,8].map(i=>`<th>열${i}</th>`).join("") + "<th>정답</th></tr>" +
+    raw.slice(0,5).map((r,i)=>`<tr><td class="num">${i+1}</td>` + r.slice(0,8).map(v=>`<td class="num">${Lab.fmt(v,3)}</td>`).join("") + `<td class="num">${r[8]}</td></tr>`).join("");
+  document.querySelector("#headcap").textContent = `전체 ${raw.length.toLocaleString()}행 · 정답 1(펄서) ${npos.toLocaleString()}행 (${(npos/raw.length*100).toFixed(1)}%) · 0(아님) ${(raw.length-npos).toLocaleString()}행`;
+  document.querySelector("#th").oninput = e=>{ state.t=+e.target.value; draw(); };
+  document.querySelector("#tr").onchange = e=>{ state.target=+e.target.value; draw(); };
+  document.querySelector("#bPick").onclick = ()=>{ setT(pick(state.target)); draw(); };
+  document.querySelector("#bHalf").onclick = ()=>{ setT(.5); draw(); };
+  seg("split", b=>{ state.split=b.dataset.s; });
+  draw();
+  const files = ["HTRU_2.csv","scores.csv","model.json"];
+  const hs = await Promise.all(files.map(f=>sha8(`data/${f}`)));
+  document.querySelector("#hashes").textContent = files.map((f,i)=>`${f} ${hs[i]}`).join(" · ");
+  Lab.notebook("#note", "lab07", Lab.NOTE("검증에서 고른 문턱 0.16은 시험 묶음에서도 펄서 대부분을 남기는가? 정확도 말고 무엇을 함께 봐야 하나?"));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+[
+ {
+  "id": "H",
+  "file": "fig1-observed-H.txt",
+  "sha256": "3ce5475160fd6b39c41205c2055bfaf4e507981721a2eb4c5df0c99e2fa48d94",
+  "source": "GWOSC (Gravitational Wave Open Science Center), LIGO Scientific Collaboration과 Virgo Collaboration 제공 · GW150914 첫 검출 논문 그림 1에 대응하는 파형",
+  "reference": "B. P. Abbott et al., Physical Review Letters 116, 061102 (2016), doi:10.1103/PhysRevLett.116.061102, Fig. 1",
+  "rows": 3441,
+  "time_reference": "2015-09-14 09:50:45 UTC 이후의 초(0.25–0.46)",
+  "columns": "time (seconds) · strain × 10^21",
+  "preprocessing": "논문 그림용으로 이미 처리됨: 35–350 Hz 통과 필터와 장치 선(線) 잡음 제거 필터가 적용됨. 원시 보정 스트레인이 아님. 이 페이지는 추가 필터를 걸지 않았고 파일은 원본 그대로다.",
+  "limitations": "필터를 거친 그림용 자료다. 새 시간차를 쟀다거나 신호가 진짜일 확률·질량을 말할 수 없다. 상관계수는 서술용이며 구간에 따라 달라지고 검출 유의성이 아니다."
+ },
+ {
+  "id": "L",
+  "file": "fig1-observed-L.txt",
+  "sha256": "dc41302512f3e28336680030a255cc1f4fb3ec43ea5267cc044c9015051ecd85",
+  "source": "위와 같음 (리빙스턴 검출기)",
+  "rows": 3441,
+  "columns": "time (seconds) · strain × 10^21",
+  "preprocessing": "위와 같음"
+ },
+ {
+  "id": "pta",
+  "file": "pta_summary_ratios.csv",
+  "sha256": "6decad71644d7a0c3d1217f111d0c077093448b4d9f9703415191da1879179d7",
+  "derived_from": "NANOGrav 15-year 교육용 분석 요약 curn_14f_pl_vg_os.npz 의 A / A_err",
+  "source": "https://github.com/nanograv/15yr_stochastic_analysis (commit a3e8b8776a646208ca2d307f83c20bc70e029933, tutorials/data/curn_14f_pl_vg_os.npz, sha256 a9cf4f96…)",
+  "reference": "G. Agazie et al., ApJL 951, L8 (2023), doi:10.3847/2041-8213/acdac6",
+  "license": "저장소 코드는 MIT. 교육용 요약 배열을 비율로 환산한 파생 CSV",
+  "rows": 10000,
+  "columns": "noise_sample_index, monopole_ratio, dipole_ratio, hd_ratio. 열 이름은 공식 optimal_stat 노트북의 MCOS 부분과 대조해 붙인 해석이며 원본 NPZ에는 열 이름이 없다.",
+  "limitations": "값/오차는 검출 시그마가 아니다. 10,000행은 독립된 사건이 아니라 잡음 모형에서 뽑은 표본이다. 줄인 교육용 자료라 출판 논문의 결과와 정확히 같지 않을 수 있다."
+ }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "mix",
+    "file": "Figure2_Na2HPO4, Na3PO4_0.42M, 0.038M.txt",
+    "sha256": "9b247828e3ea903afa1079a5ad4c1fc2a5e9c08079b8ced4c8ba3a6dce47c3d0",
+    "source_url": "https://zenodo.org/records/7703848",
+    "doi": "10.5281/zenodo.7703848",
+    "license": "CC BY 4.0",
+    "source_kind": "실제 지상 LILBID 실험의 공개 신호; Cassini 측정값 아님",
+    "raw_rows": 28000,
+    "selected_rows": 17036,
+    "plotted_rows": 760,
+    "processing": "20≤m/z≤210 선택, 이 구간 최대 신호로 나눔. 0.25 u/e 구간별 최댓값을 표시. 평활화·기저선 보정·절대 농도 환산 없음. CSV는 구간 선택·정규화만 하고 축소하지 않음.",
+    "columns": "첫 열: 보정된 m/z, 단일 양이온의 u/e; 둘째 열: 원 파일 신호(단위 명시 없음)를 구간 최대값으로 나눈 상대 신호. 논문 ED Fig1–3 및 Fig2와 대응.",
+    "limitations": "용액 종류·농도·측정 조건이 다르므로 높이를 바로 농도로 비교할 수 없다. 지정 구간 최고점은 분자 동정·유의성 검정이 아니다. 실험실 신호만으로 외계 인산염이나 생명을 새로 검출한 것이 아니다."
+  },
+  {
+    "id": "tri",
+    "file": "EDFigure1_Na3PO4_0.1M.txt",
+    "sha256": "d10b64f84379478fccb2e02d5a3b9812fc1a8dde2d000cf1b8bd8007f92e9ca0",
+    "source_url": "https://zenodo.org/records/7703848",
+    "doi": "10.5281/zenodo.7703848",
+    "license": "CC BY 4.0",
+    "source_kind": "실제 지상 LILBID 실험의 공개 신호; Cassini 측정값 아님",
+    "raw_rows": 28000,
+    "selected_rows": 17036,
+    "plotted_rows": 760,
+    "processing": "20≤m/z≤210 선택, 이 구간 최대 신호로 나눔. 0.25 u/e 구간별 최댓값을 표시. 평활화·기저선 보정·절대 농도 환산 없음. CSV는 구간 선택·정규화만 하고 축소하지 않음.",
+    "columns": "첫 열: 보정된 m/z, 단일 양이온의 u/e; 둘째 열: 원 파일 신호(단위 명시 없음)를 구간 최대값으로 나눈 상대 신호. 논문 ED Fig1–3 및 Fig2와 대응.",
+    "limitations": "용액 종류·농도·측정 조건이 다르므로 높이를 바로 농도로 비교할 수 없다. 지정 구간 최고점은 분자 동정·유의성 검정이 아니다. 실험실 신호만으로 외계 인산염이나 생명을 새로 검출한 것이 아니다."
+  },
+  {
+    "id": "di",
+    "file": "EDFigure2_Na2HPO4_0.1M.txt",
+    "sha256": "fd1bb7adf7741bdbc962d18a2a3631cef2eb4e5b513ae0e4ef0c980308b88bf0",
+    "source_url": "https://zenodo.org/records/7703848",
+    "doi": "10.5281/zenodo.7703848",
+    "license": "CC BY 4.0",
+    "source_kind": "실제 지상 LILBID 실험의 공개 신호; Cassini 측정값 아님",
+    "raw_rows": 28000,
+    "selected_rows": 17036,
+    "plotted_rows": 760,
+    "processing": "20≤m/z≤210 선택, 이 구간 최대 신호로 나눔. 0.25 u/e 구간별 최댓값을 표시. 평활화·기저선 보정·절대 농도 환산 없음. CSV는 구간 선택·정규화만 하고 축소하지 않음.",
+    "columns": "첫 열: 보정된 m/z, 단일 양이온의 u/e; 둘째 열: 원 파일 신호(단위 명시 없음)를 구간 최대값으로 나눈 상대 신호. 논문 ED Fig1–3 및 Fig2와 대응.",
+    "limitations": "용액 종류·농도·측정 조건이 다르므로 높이를 바로 농도로 비교할 수 없다. 지정 구간 최고점은 분자 동정·유의성 검정이 아니다. 실험실 신호만으로 외계 인산염이나 생명을 새로 검출한 것이 아니다."
+  },
+  {
+    "id": "phosphite",
+    "file": "EDFigure3_Na2HPO4,Na3PO4,Na2HPO3_0.3M,0.2M,0.01M.txt",
+    "sha256": "7e35f7e3ab818cf8ad1fe267a381db01f03493c9d423bfe3b1f4f1a5e05b6af5",
+    "source_url": "https://zenodo.org/records/7703848",
+    "doi": "10.5281/zenodo.7703848",
+    "license": "CC BY 4.0",
+    "source_kind": "실제 지상 LILBID 실험의 공개 신호; Cassini 측정값 아님",
+    "raw_rows": 28000,
+    "selected_rows": 17036,
+    "plotted_rows": 760,
+    "processing": "20≤m/z≤210 선택, 이 구간 최대 신호로 나눔. 0.25 u/e 구간별 최댓값을 표시. 평활화·기저선 보정·절대 농도 환산 없음. CSV는 구간 선택·정규화만 하고 축소하지 않음.",
+    "columns": "첫 열: 보정된 m/z, 단일 양이온의 u/e; 둘째 열: 원 파일 신호(단위 명시 없음)를 구간 최대값으로 나눈 상대 신호. 논문 ED Fig1–3 및 Fig2와 대응.",
+    "limitations": "용액 종류·농도·측정 조건이 다르므로 높이를 바로 농도로 비교할 수 없다. 지정 구간 최고점은 분자 동정·유의성 검정이 아니다. 실험실 신호만으로 외계 인산염이나 생명을 새로 검출한 것이 아니다."
+  }
+]

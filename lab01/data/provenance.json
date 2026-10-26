@@ -1,0 +1,34 @@
+[
+ {
+  "source": "https://zenodo.org/records/16620803",
+  "doi": "10.5281/zenodo.16620803",
+  "creator": "Enrico Camporeale",
+  "license": "CC BY 4.0",
+  "version": "2025-07-30",
+  "id": "forecast_pairs.csv",
+  "origin_file": "data/event_probabilities_with_classes_final.csv (ZIP 안, sha256 88eb276a5f07f3835dddfa834990f9bd9344a192f07eb35d73018e19ef54f9c9; ZIP sha256 3eb8c744a414af716bf9334f69faf066408551b0080b2194acd7fd006342c32a)",
+  "original_rows": 10338,
+  "pair_rows": 58814,
+  "processing": "발행일 1998-01-01–2024-12-31만 사용. 원 행의 24/48/72시간 열을 첫째/둘째/셋째 유효 날짜(lead 1/2/3)로 풀고 M_true/X_true를 합치지 않고 급수(M, X)별로 따로 둠. 대상 날짜는 실제 달력 날짜로 원 표의 기록과 맞춤. 대상 날짜의 기록이 없는 짝(1999-04-12 등 23곳×3)은 ‘발생 없음’으로 채우지 않고 뺌. 대상 날짜의 마지막은 2024-12-31.",
+  "columns": "issue 발행일, target 대상 날짜, lead 발행일 다음 날=1, kind M/X, p 예보 확률(0–1), y 실제 발생(0/1)",
+  "limitations": "교육용 재계산이다. 원 논문의 모든 점수를 재현하지 않았고 원 노트북의 행 이동 방식과 다르다. 실시간 예보, 새 태양물리 검출, 설비 운영 판단에 쓸 수 없다."
+ },
+ {
+  "id": "forecast_counts.csv",
+  "derived_from": "forecast_pairs.csv",
+  "processing": "(kind, lead, 발행 연도, 확률 %) 조합마다 날짜 수 n과 실제 발생 수 events를 셈. 확률은 round(p×100)한 정수(%). 값은 0.01–0.95의 21가지뿐이라 정보 손실 없음. 1,669행. 브라우저가 느려지지 않도록 만든 파일이며 analysis.py는 원표를 직접 읽음.",
+  "license": "CC BY 4.0 (원 자료와 같음)"
+ },
+ {
+  "id": "persistence_counts.csv",
+  "derived_from": "forecast_pairs.csv (lead=1)",
+  "processing": "‘대상 날짜의 달력상 하루 전 기록이 있고 그 값이 1이면 오늘도 1’이라는 지속 예보를 (급수, 발행 연도)별로 맞힌/괜히 울린/놓친/조용히 맞힌 날로 셈. 하루 전 기록이 없는 날은 뺌. X급 전체 합계 54/199/199/9,330 (9,782일).",
+  "license": "CC BY 4.0 (원 자료와 같음)"
+ },
+ {
+  "id": "20240510RSGA.txt",
+  "source": "NOAA SWPC 공개 보고서 RSGA (Joint USAF/NOAA Solar Geophysical Activity Report and Forecast), 2024-05-10 22:00 UTC 발행",
+  "processing": "원문 그대로 복사. 책 1장 첫째 단계에서 X급 확률 75/75/75 대목을 읽는 데 쓴다.",
+  "license": "미국 정부 간행물, 공개 문서"
+ }
+]

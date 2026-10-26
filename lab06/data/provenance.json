@@ -1,0 +1,36 @@
+{
+ "source": "https://zenodo.org/records/6959427",
+ "doi": "10.5281/zenodo.6959427",
+ "version": "v1; 2022-08-03",
+ "license": "CC BY 4.0",
+ "authors": "JWST Transiting Exoplanet Community Early Release Science Team",
+ "observation": "2022-07-10 JWST NIRSpec PRISM; same transit, four reductions",
+ "transform": "원본 통과 깊이와 양쪽 1σ 오차에 1e6을 곱해 ppm으로 변환. 파장은 μm 그대로. TIBERIUS bad pixel flag를 보존하고 기본 표시·집계에서는 flag≠0 제외. 새 보정·재적합·보간 없음.",
+ "rows": 499,
+ "counts": {
+  "FIREFLY": {
+   "total": 95,
+   "flagged": 0
+  },
+  "TSHIRT": {
+   "total": 67,
+   "flagged": 0
+  },
+  "TIBERIUS": {
+   "total": 243,
+   "flagged": 18
+  },
+  "EUREKA": {
+   "total": 94,
+   "flagged": 0
+  }
+ },
+ "checksum_zip": "578368eb0c86014462f109d1e8699693",
+ "expected_md5": "md5:578368eb0c86014462f109d1e8699693",
+ "download_success_url": "https://zenodo.org/records/6959427/files/JWST_ERS_1st_LOOK_PAPER_DATA.zip?download=1",
+ "lab_copy": {
+  "file": "wasp39b_spectra.csv",
+  "sha256": "f18a4941cd18720aa0ef24085d0e63ecbdb79fdd4d3496f3e9dd8bc02aa49322",
+  "processing": "책 자료 폴더의 파일을 그대로 복사(수정·축소 없음). 열: pipeline, wavelength_um, depth_ppm, err_low_ppm, err_high_ppm, flag. 499행."
+ }
+}

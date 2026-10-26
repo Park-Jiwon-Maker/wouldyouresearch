@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>표범 무늬의 원소 세기 · 우주 리서치 실습 04</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&family=Noto+Serif+KR:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>:root{--ch:#B5543C;--ch-tint:#F5E7E2}</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../index.html">우주 리서치 · 실습</a><span class="chap">4장 화성의 돌</span></div></header>
+<main class="wrap">
+
+<div class="hero">
+ <div class="kick">직접 해보기 04</div>
+ <h1>표범 무늬의 원소 세기</h1>
+ <div class="meta">약 30분 · 브라우저에서 코드 없이 · Python 선택</div>
+ <p class="lede">체야바 폭포의 돌에는 표범 무늬 같은 반점이 있다. 퍼서비어런스의 PIXL이 그 위에서 점 1,649개의 원소를 쟀다. 반점의 테두리와 속은 바탕과 얼마나 다른가? 연구진이 고른 구역 목록으로 평균을 내고 바탕으로 나누어, 책 오른쪽 쪽의 배수를 직접 다시 만든다.</p>
+</div>
+
+<section>
+ <h2><span class="n">1</span>출처부터 확인한다</h2>
+ <p class="sub">그래프보다 먼저 읽어야 할 것: 이 자료는 어디서, 무엇으로, 어떻게 만들어졌는가.</p>
+ <table class="prov">
+  <tr><td>자료</td><td>NASA 행성자료시스템(PDS) 지구과학 노드, 퍼서비어런스 PIXL 체야바 폭포 자료 묶음. <a href="https://doi.org/10.17189/vth5-0676">doi:10.17189/vth5-0676</a> · 미국 정부 공공 자료(출처 표기)</td></tr>
+  <tr><td>무엇을 쟀나</td><td>2024년 6월 23일(sol 1188), 돌 표면을 X선으로 훑어 점마다 낸 산화물 함량(wt%). 두 검출기 합. 점의 위치는 PIXL 본 묶음의 빔 위치 표에서 가져왔고, ‘테두리·양귀비씨’, ‘반점 속’, ‘인산철 없는 바탕’ 구역 목록은 연구진이 정한 것이다.</td></tr>
+  <tr><td>이 페이지의 처리</td><td>표 세 개를 PMC 번호로 이어 하나로 묶었다(<span class="mono">points.csv</span>, 1,649행). 띠가 가로로 놓이도록 좌표를 돌렸을 뿐 값은 원본 그대로다. 평균은 점별 단순 평균이고 가중이나 보정은 없다. 논문 보충 자료(CC BY-NC-ND)는 쓰지 않았다.</td></tr>
+  <tr><td>파일 지문</td><td class="mono" id="hashes">—</td></tr>
+ </table>
+</section>
+
+<section>
+ <h2><span class="n">2</span>원소 지도와 배수를 직접 본다</h2>
+ <p class="sub">산화물과 구역을 골라 본다. 지도는 고른 산화물이 진할수록 많은 곳이고, 짙은 점이 고른 구역이다. 배수 = 구역 평균 ÷ 바탕 평균.</p>
+ <div class="controls">
+  <div class="ctl"><label for="ox">산화물</label>
+   <select id="ox">
+    <option value="P2O5">P₂O₅ (인)</option>
+    <option value="SO3">SO₃ (황)</option>
+    <option value="FeO-T">FeO-T (철, 전체)</option>
+    <option value="CaO">CaO (칼슘)</option>
+    <option value="NiO">NiO (니켈)</option>
+    <option value="SiO2">SiO₂</option>
+    <option value="Al2O3">Al₂O₃</option>
+    <option value="MgO">MgO</option>
+    <option value="Na2O">Na₂O</option>
+    <option value="K2O">K₂O</option>
+    <option value="Cl">Cl</option>
+    <option value="TiO2">TiO₂</option>
+    <option value="MnO">MnO</option>
+    <option value="ZnO">ZnO</option>
+   </select></div>
+  <div class="ctl"><label>구역</label><div class="seg" id="reg"><button data-r="rims" class="on">테두리·양귀비씨</button><button data-r="cores">반점 속</button><button data-r="band">띠 전체</button></div></div>
+  <div class="ctl"><label><input type="checkbox" id="vein"> 띠 전체에서 오른쪽 끝 맥(u &gt; 10 mm) 빼기</label></div>
+ </div>
+ <div class="plot" id="plot"></div>
+ <p class="caption" id="cap"></p>
+ <table class="res" id="res"></table>
+ <h3 style="margin-top:18px;font-size:15px">고른 구역의 주요 산화물 한눈에</h3>
+ <table class="res" id="all"></table>
+</section>
+
+<section>
+ <h2><span class="n">3</span>해 볼 일</h2>
+ <ol class="steps">
+  <li><span><b>자료를 받는다.</b> 산화물 표(파일명에 rqc, 두 검출기 합)와 구역 목록 셋, 위치 표를 확인한다. 이 페이지는 이미 하나로 묶어 두었다.</span></li>
+  <li><span><b>점과 구역을 잇는다.</b> 산화물을 P₂O₅로 두고 ‘테두리·양귀비씨’를 고른다. 진한 고리가 어디 있는가? ‘반점 속’을 고르면 어느 점이 짙어지는가?</span></li>
+  <li><span><b>세 무리의 평균을 낸다.</b> 아래 표의 바탕 502점·테두리 243점·반점 속 43점에서 FeO-T, P₂O₅, SO₃, CaO 평균을 읽는다.</span></li>
+  <li><span><b>바탕으로 나눈다.</b> 테두리와 속의 배수를 비교한다. 어느 원소가 어디에 몰렸는가? 니켈(NiO)은 어떤가?</span></li>
+  <li><span><b>함정을 점검한다.</b> ‘띠 전체’의 SO₃와 CaO 평균을 본다. 오른쪽 끝의 흰 맥을 빼면 값이 어떻게 바뀌는가? 구역 목록에는 머리줄이 없어 첫 줄도 점 번호다.</span></li>
+ </ol>
+</section>
+
+<section>
+ <h2><span class="n">4</span>예상 결과와 비교한다</h2>
+ <p class="sub">책 4장 오른쪽 쪽의 숫자다. 맥 빼기를 켰다면 띠 전체의 값이 달라지는 것이 정상이다. 무엇이 달라졌는지가 이 실습의 핵심이다.</p>
+ <div class="expect">
+  <h3>테두리엔 인이, 속엔 황이 두 배 가까이 몰렸다</h3>
+  <div id="cmp"></div>
+  <p class="note">비교 조건: 바탕 = 인산철 없는 이암 502점 평균을 1로 놓은 배수. 예: P₂O₅ 3.34% ÷ 1.75% = 1.90. 반점 속에서 황은 늘고 칼슘은 줄었다. 늘어난 황은 맥의 황산칼슘이 아니라 철과 묶인 황, 곧 황화철을 가리킨다. 테두리에서 인과 철이 함께 느는 것은 인산철과 어울린다. 다만 이 계산은 ‘측정’ 계단이다. 원소가 몰렸다는 것만으로 광물 이름을 정할 수 없고, 생명은 더욱 말할 수 없다.</p>
+ </div>
+ <h3 style="margin-top:22px;font-size:15px">결과가 다르다면</h3>
+ <ul class="note">
+  <li>논문 보충 자료의 값(테두리 P₂O₅ 3.11%, 속 SO₃ 7.68%)은 스펙트럼을 합쳐 보정한 값이라 점 평균과 조금 다르다.</li>
+  <li>구역 목록에는 머리줄이 없다. 첫 줄을 버리면 점 수가 하나씩 모자란다(502 · 243 · 43).</li>
+  <li>‘맥 빼기’가 켜져 있으면 띠 전체의 값이 달라진다.</li>
+  <li>Python 결과가 화면과 다르면 파일 지문(SHA256)부터 비교한다.</li>
+ </ul>
+</section>
+
+<section>
+ <h2><span class="n">5</span>같은 계산을 코드로</h2>
+ <p class="sub">표준 라이브러리만 쓰므로 Python 3만 있으면 된다.</p>
+<pre>python3 analysis.py                                  # 테두리 P₂O₅ 배수
+python3 analysis.py --check                          # 책의 예상 결과와 비교
+python3 analysis.py --oxide NiO --region cores       # 조건을 바꿔 보기
+python3 analysis.py --build                          # 브라우저용 points.csv 다시 만들기</pre>
+ <div class="files">
+  <a href="analysis.py" download><b>analysis.py</b><span>같은 계산 · 표준 라이브러리</span></a>
+  <a href="notebook.ipynb" download><b>notebook.ipynb</b><span>그림과 함께 따라 하기</span></a>
+  <a href="expected.json" download><b>expected.json</b><span>책의 예상 결과</span></a>
+  <a href="data/points.csv" download><b>data/points.csv</b><span>브라우저용 · 1,649점</span></a>
+  <a href="data/ps__1188_0772445544_000rqc__05410104308341770000___j01.csv" download><b>산화물 표(rqc)</b><span>PDS 원본</span></a>
+  <a href="data/pe__1188_0772443549_000rxl__05410104308341770003___j02.csv" download><b>빔 위치 표</b><span>PDS 원본</span></a>
+  <a href="data/provenance.json" download><b>data/provenance.json</b><span>출처·처리 기록</span></a>
+ </div>
+</section>
+
+<section>
+ <h2><span class="n">6</span>연구 노트</h2>
+ <p class="sub">질문은 좁게, 선택과 결과는 따로. 다른 사람이 똑같이 다시 할 수 있게 적는다.</p>
+ <div id="note"></div>
+</section>
+
+<section>
+ <h2>다음 걸음</h2>
+ <p>니켈(NiO)의 배수도 구해 보자. 반점 속에서 1.86배가 나온다면, 2026년 니켈 논문과 비교해 읽어 볼 차례다. 원자료는 <a href="https://pds-geosciences.wustl.edu/">NASA PDS 지구과학 노드</a>에 공개되어 있다.</p>
+</section>
+</main>
+<footer><div class="wrap">《우주 리서치》 4장 「화성 돌 속의 생명 흔적」의 실습 · 자료 이용 조건은 각 출처를 따른다.</div></footer>
+
+<script src="../assets/lab.js"></script>
+<script>
+const LABEL = {"P2O5":"P₂O₅","SO3":"SO₃","FeO-T":"FeO-T","CaO":"CaO","NiO":"NiO","SiO2":"SiO₂","Al2O3":"Al₂O₃","MgO":"MgO","Na2O":"Na₂O","K2O":"K₂O","Cl":"Cl","TiO2":"TiO₂","MnO":"MnO","ZnO":"ZnO"};
+const RNAME = {rims:"테두리·양귀비씨", cores:"반점 속", band:"띠 전체", matrix:"바탕"};
+const KEY5 = ["FeO-T","P2O5","SO3","CaO","NiO"];
+const VEIN_U = 10;
+// [라벨, 구역, 산화물, 값, 종류(ratio/mean/base), 자리수]
+const EXPECTED = [
+ ["테두리 P₂O₅ 배수","rims","P2O5",1.90,"ratio"], ["테두리 FeO-T 배수","rims","FeO-T",1.16,"ratio"], ["테두리 CaO 배수","rims","CaO",0.90,"ratio"],
+ ["반점 속 SO₃ 배수","cores","SO3",1.72,"ratio"], ["반점 속 FeO-T 배수","cores","FeO-T",1.15,"ratio"], ["반점 속 CaO 배수","cores","CaO",0.92,"ratio"], ["반점 속 NiO 배수","cores","NiO",1.86,"ratio"],
+ ["테두리 P₂O₅ 평균 ÷ 바탕 평균 (%)","rims","P2O5",3.34,"mean"], ["바탕 P₂O₅ 평균 (%)","matrix","P2O5",1.75,"mean"],
+ ["반점 속 SO₃ 평균 (%)","cores","SO3",7.72,"mean"], ["바탕 SO₃ 평균 (%)","matrix","SO3",4.49,"mean"],
+ ["띠 전체 SO₃ 평균 (%)","band","SO3",9.40,"mean"], ["띠 전체 CaO 평균 (%)","band","CaO",3.64,"mean"], ["바탕 CaO 평균 (%)","matrix","CaO",1.62,"mean"]
+];
+const state = {ox:"P2O5", reg:"rims", vein:false};
+let pts = [];
+
+function members(reg){
+  if (reg==="band") return pts.filter(p=>!state.vein || p.u<=VEIN_U);
+  return pts.filter(p=>p.group===({rims:"rims",cores:"cores",matrix:"matrix"})[reg]);
+}
+function stat(reg, ox){
+  const a = members(reg).map(p=>p[ox]);
+  const n = a.length, m = a.reduce((s,v)=>s+v,0)/n;
+  const sd = Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/(n-1));
+  return {n, mean:m, se:sd/Math.sqrt(n)};
+}
+function enrich(reg, ox){
+  const s = stat(reg, ox), b = stat("matrix", ox), r = s.mean/b.mean;
+  return {s, b, ratio:r, err:r*Math.sqrt((s.se/s.mean)**2+(b.se/b.mean)**2)};
+}
+async function sha8(url){
+  const buf = await (await fetch(url)).arrayBuffer();
+  if (!window.crypto || !crypto.subtle) return "—";
+  const h = await crypto.subtle.digest("SHA-256", buf);
+  return [...new Uint8Array(h)].slice(0,4).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function draw(){
+  const ox = state.ox, sel = new Set(members(state.reg).map(p=>p.PMC));
+  const vmax = Math.max(...pts.map(p=>p[ox]).sort((a,b)=>a-b).slice(0, Math.floor(pts.length*.98)).slice(-1), 1e-9);
+  const bins = [[0,.25,.12],[.25,.5,.3],[.5,.75,.55],[.75,9,.9]];
+  const series = bins.map(([a,b,op])=>{
+    const q = pts.filter(p=>{const f=p[ox]/vmax; return f>=a && f<b;});
+    return {type:"dots", x:q.map(p=>p.u), y:q.map(p=>p.v), color:"#B5543C", opacity:op, r:3.2};
+  });
+  const hi = pts.filter(p=>sel.has(p.PMC));
+  series.push({type:"dots", x:hi.map(p=>p.u), y:hi.map(p=>p.v), color:"#222", opacity:.9, r:1.6});
+  Lab.plot("#plot", {series, xmin:0, xmax:12.4, ymin:0, ymax:2.4, height:250, xticks:12,
+    vlines: state.reg==="band" && state.vein ? [{x:VEIN_U, label:"맥 경계 10 mm", dash:"4 4"}] : [],
+    xlabel:"띠 방향 (mm)", ylabel:`${LABEL[ox]} 지도 · 진할수록 많다(${vmax.toFixed(1)} wt% 이상은 같은 색) · 검은 점 = ${RNAME[state.reg]}`});
+  document.querySelector("#cap").textContent = `${LABEL[ox]} · ${RNAME[state.reg]} ${sel.size.toLocaleString("ko-KR")}점 강조. 측정점 ${pts.length.toLocaleString("ko-KR")}개를 가로로 돌려 놓았다.`;
+  const e = enrich(state.reg, ox);
+  document.querySelector("#res").innerHTML =
+   `<tr><th>구분</th><th>점 수</th><th>평균 (wt%)</th><th>배수 (바탕=1)</th></tr>` +
+   `<tr><td>${RNAME.matrix}</td><td class="num">${e.b.n}</td><td class="num">${Lab.fmt(e.b.mean,2)}</td><td class="num">1.00</td></tr>` +
+   `<tr><td>${RNAME[state.reg]}</td><td class="num">${e.s.n.toLocaleString("ko-KR")}</td><td class="num">${Lab.fmt(e.s.mean,2)}</td><td class="num"><b>${Lab.fmt(e.ratio,2)}×</b> <span class="note">(±${Lab.fmt(e.err,2)})</span></td></tr>`;
+  let h = "<tr><th>산화물</th><th>구역 평균</th><th>바탕 평균</th><th>배수</th></tr>";
+  for (const k of KEY5){ const x = enrich(state.reg, k);
+    h += `<tr${k===ox?' style="font-weight:700"':""}><td>${LABEL[k]}</td><td class="num">${Lab.fmt(x.s.mean,2)}</td><td class="num">${Lab.fmt(x.b.mean,2)}</td><td class="num">${Lab.fmt(x.ratio,2)}×</td></tr>`; }
+  document.querySelector("#all").innerHTML = h;
+  Lab.compare("#cmp", EXPECTED.map(([label,reg,o,exp,kind])=>{
+    const x = enrich(reg,o);
+    const mine = kind==="ratio" ? x.ratio : x.s.mean;
+    return {label, mine, expected:exp, tol:.005, digits:2};
+  }));
+}
+(async()=>{
+  const rows = await Lab.csv("data/points.csv");
+  pts = rows.map(r=>({...r, PMC:+r.PMC, u:r.u_mm, v:r.v_mm}));
+  document.querySelector("#ox").onchange = e=>{state.ox=e.target.value; draw();};
+  document.querySelector("#vein").onchange = e=>{state.vein=e.target.checked; draw();};
+  document.querySelectorAll("#reg button").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll("#reg button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); state.reg=b.dataset.r; draw();
+  });
+  draw();
+  const files = ["ps__1188_0772445544_000rqc__05410104308341770000___j01","pe__1188_0772443549_000rxl__05410104308341770003___j02","points"];
+  const hs = await Promise.all(files.map(f=>sha8(`data/${f}.csv`)));
+  document.querySelector("#hashes").textContent = ["rqc 산화물 표","빔 위치 표","points.csv"].map((n,i)=>`${n} ${hs[i]}`).join(" · ");
+  Lab.notebook("#note", "lab04", Lab.NOTE("테두리에서는 어떤 원소가, 반점 속에서는 어떤 원소가 바탕보다 몰렸나? 띠 전체 평균은 왜 믿으면 안 되나?"));
+})();
+</script>
+</body>
+</html>

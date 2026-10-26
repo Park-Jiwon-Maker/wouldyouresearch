@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>33분에서 β까지 · 우주 리서치 실습 03</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&family=Noto+Serif+KR:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>:root{--ch:#6E7F8D;--ch-tint:#E8ECEF}</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../index.html">우주 리서치 · 실습</a><span class="chap">3장 소행성 방위</span></div></header>
+<main class="wrap">
+
+<div class="hero">
+ <div class="kick">직접 해보기 03</div>
+ <h1>33분에서 β까지</h1>
+ <div class="meta">약 30분 · 브라우저에서 코드 없이 · Python 선택</div>
+ <p class="lede">논문이 공개한 표의 숫자로 DART의 결과를 다시 계산한다. 주기 변화를 속도 변화로, 속도 변화를 운동량 증폭 β로 바꾼다. 연구진이 풀었던 계산의 뼈대를 따라가는 실습이다. 디모르포스의 밀도는 아무도 재지 못했으니, 밀도를 바꿔 가며 β가 어떻게 움직이는지가 핵심이다.</p>
+</div>
+
+<section>
+ <h2><span class="n">1</span>출처부터 확인한다</h2>
+ <p class="sub">그래프보다 먼저 읽어야 할 것: 이 자료는 어디서, 무엇으로, 어떻게 만들어졌는가.</p>
+ <table class="prov">
+  <tr><td>자료</td><td>Cheng, A. F. 외 (2023) Nature 616:457, 확장 자료 표 1 <a href="https://doi.org/10.1038/s41586-023-05878-z">doi:10.1038/s41586-023-05878-z</a> · Thomas, C. A. 외 (2023) Nature 616:448 <a href="https://doi.org/10.1038/s41586-023-05805-2">doi:10.1038/s41586-023-05805-2</a></td></tr>
+  <tr><td>무엇인가</td><td>관측 원자료가 아니라, 논문이 표로 공개한 숫자(충돌 속도 벡터, 궤도 주기, 타원체 크기 등)를 옮겨 적은 파일이다. 사실 값의 인용이다.</td></tr>
+  <tr><td>가정인 것</td><td>디모르포스의 밀도(1,500–3,300 kg/m³)는 측정값이 아니라 가정이다. 이 실습에서 바꾸는 값이 바로 이것이다.</td></tr>
+  <tr><td>이 페이지의 처리</td><td>가공하지 않았다. 계산은 모두 이 브라우저에서 한다.</td></tr>
+  <tr><td>파일 지문</td><td class="mono" id="hashes">—</td></tr>
+ </table>
+</section>
+
+<section>
+ <h2><span class="n">2</span>값을 직접 바꿔 본다</h2>
+ <p class="sub">밀도, 충돌 뒤 주기, 궤도 반지름을 바꾸면 주기 변화 · Δv · β가 다시 계산된다. 처음 값이 책의 값이다.</p>
+ <div class="controls">
+  <div class="ctl"><label for="rho">가정한 밀도 <span class="val" id="rhov"></span></label><input type="range" id="rho" min="1000" max="4000" step="50" value="2400"></div>
+  <div class="ctl"><label for="ppost">충돌 뒤 주기(시간) <span class="val" id="ppostv"></span></label><input type="range" id="ppost" min="11.30" max="11.60" step="0.001" value="11.372"></div>
+  <div class="ctl"><label for="sma">궤도 반지름(km) <span class="val" id="smav"></span></label><input type="range" id="sma" min="1.10" max="1.30" step="0.001" value="1.206"></div>
+  <div class="ctl"><label>β에 쓰는 Δv</label><div class="seg" id="dvsrc"><button data-s="paper" class="on">논문 −2.70</button><button data-s="own">내가 구한 값</button></div></div>
+  <div class="ctl"><label>&nbsp;</label><button class="btn ghost" type="button" id="reset">책의 값으로 되돌리기</button></div>
+ </div>
+ <div class="plot" id="plotbeta"></div>
+ <p class="caption" id="cap"></p>
+ <table class="res" id="res"></table>
+ <div class="plot" id="plotdrift" style="margin-top:18px"></div>
+ <p class="caption">옛 주기로 예측한 그림자 시각보다 실제 그림자가 얼마나 앞당겨지는가. 한 바퀴(새 주기)마다 ΔP만큼 쌓인다.</p>
+</section>
+
+<section>
+ <h2><span class="n">3</span>해 볼 일</h2>
+ <ol class="steps">
+  <li><span><b>주기 변화를 구한다.</b> 충돌 전 11.92148시간, 뒤 11.372시간. 차이를 분으로 바꾸고 논문 값 −33.0±1.0분과 견준다.</span></li>
+  <li><span><b>공전 속도를 구한다.</b> 궤도 반지름 1.206km를 원 궤도로 보고 v = 2πa/P를 계산한다. 초속 몇 cm인가?</span></li>
+  <li><span><b>속도 변화로 바꾼다.</b> 원 궤도에서는 ΔP/P = 3Δv/v다. Δv를 mm/s로 구해 논문의 −2.70±0.10과 견준다.</span></li>
+  <li><span><b>질량을 가정한다.</b> 디모르포스를 177×174×116m 타원체로 보고 부피를 구한다(π/6×세 길이의 곱). 밀도 2,400kg/m³를 곱한다.</span></li>
+  <li><span><b>β를 계산한다.</b> 표의 세 방향 벡터(DART 속도, 분출 방향, 공전 방향)를 Cheng 외의 식 2에 넣는다. 밀도를 1,500과 3,300으로 바꿔 다시 계산한다.</span></li>
+ </ol>
+</section>
+
+<section>
+ <h2><span class="n">4</span>예상 결과와 비교한다</h2>
+ <p class="sub">책 3장 오른쪽 쪽의 숫자다. 조건을 바꿨다면 값이 달라지는 것이 정상이다. 무엇이 달라졌는지가 이 실습의 핵심이다.</p>
+ <div class="expect">
+  <h3>분출물이 탐사선보다 2–4배 더 밀었다</h3>
+  <div id="cmp"></div>
+  <p class="note">비교 조건: 밀도 2,400 (β 행은 1,500 · 2,400 · 3,300을 따로 계산), 충돌 뒤 주기 11.372시간, 궤도 반지름 1.206km, β에는 논문의 Δv −2.70mm/s. 논문의 값은 −33.0±1.0분, −2.70±0.10mm/s, β 2.2–4.9(2,400에서 3.61)이다.</p>
+  <ul class="note">
+   <li>밀도를 어떻게 잡아도 β는 2보다 크다. 이것이 이 결과의 단단한 부분이다. β=1이었다면 Δv는 −0.77mm/s에 그쳤을 것이다. 실제 값은 그 3.5배다.</li>
+   <li>내 계산(3.50)과 논문(3.61)이 조금 다른 것은 논문이 모든 입력값의 불확도를 10만 번 섞어 계산한 중앙값이기 때문이다. 어느 쪽도 디모르포스의 실제 밀도를 모르는 채로 낸 값이다.</li>
+  </ul>
+ </div>
+ <h3 style="margin-top:22px;font-size:15px">결과가 다르다면</h3>
+ <ul class="note">
+  <li>단위를 확인한다. 속도 벡터는 km/s, Δv는 mm/s다. 둘 중 하나를 바꾸지 않으면 β가 1에 붙는다.</li>
+  <li>부피는 π/6×(긴 지름×중간 지름×짧은 지름)이다. 반지름으로 4π/3를 쓰면 같은 값이 나와야 한다.</li>
+  <li>Python 결과가 화면과 다르면 파일 지문(SHA256)부터 비교한다.</li>
+ </ul>
+</section>
+
+<section>
+ <h2><span class="n">5</span>같은 계산을 코드로</h2>
+ <p class="sub">표준 라이브러리만 쓰므로 Python 3만 있으면 된다.</p>
+<pre>python3 analysis.py                         # 주기 변화 · Δv · β
+python3 analysis.py --check                 # 책의 예상 결과와 비교
+python3 analysis.py --rho 3000 --own-dv     # 밀도 바꾸기 · 내가 구한 Δv로 β 계산</pre>
+ <div class="files">
+  <a href="analysis.py" download><b>analysis.py</b><span>같은 계산 · 표준 라이브러리</span></a>
+  <a href="notebook.ipynb" download><b>notebook.ipynb</b><span>그림과 함께 따라 하기</span></a>
+  <a href="expected.json" download><b>expected.json</b><span>책의 예상 결과</span></a>
+  <a href="data/dart_published_values.csv" download><b>data/dart_published_values.csv</b><span>논문 표의 값 · 19행</span></a>
+  <a href="data/provenance.json" download><b>data/provenance.json</b><span>출처·처리 기록</span></a>
+ </div>
+</section>
+
+<section>
+ <h2><span class="n">6</span>연구 노트</h2>
+ <p class="sub">질문은 좁게, 선택과 결과는 따로. 다른 사람이 똑같이 다시 할 수 있게 적는다.</p>
+ <div id="note"></div>
+</section>
+
+<section>
+ <h2>다음 걸음</h2>
+ <p>헤라가 잴 디모르포스의 질량을 기다리며, 밀도를 바꿔 가며 β가 3이 되는 밀도를 찾아 적어 두자.</p>
+</section>
+</main>
+<footer><div class="wrap">《우주 리서치》 3장 「소행성 충돌을 막을 수 있을까」의 실습 · 자료 이용 조건은 각 출처를 따른다.</div></footer>
+
+<script src="../assets/lab.js"></script>
+<script>
+const DEF = {rho:2400, ppost:11.372, sma:1.206};
+const state = {...DEF, dv:"paper"};
+let V = {};
+const dot = (x,y)=>x.reduce((s,a,i)=>s+a*y[i],0);
+
+async function sha8(url){
+  const buf = await (await fetch(url)).arrayBuffer();
+  if (!crypto.subtle) return "—";
+  const h = await crypto.subtle.digest("SHA-256", buf);
+  return [...new Uint8Array(h)].slice(0,4).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function calc(rho, ppost, sma, dv){
+  const v = V, P0 = v.P_pre;
+  const U=[v.U_x,v.U_y,v.U_z], E=[v.E_x,v.E_y,v.E_z], eT=[v.eT_x,v.eT_y,v.eT_z];
+  const dP = (ppost-P0)*60;
+  const vorb = 2*Math.PI*sma*1e3/(P0*3600);
+  const dvMine = vorb*(ppost-P0)/(3*P0);
+  const vol = Math.PI/6*v.B_x*v.B_y*v.B_z;
+  const dvT = dv==="paper" ? v.dv_T*1e-3 : dvMine;
+  const beta = r => 1 + ((r*vol/v.m)*dvT - dot(U,eT)*1e3)/((dot(E,U)*1e3)*dot(E,eT));
+  return {dP, vcm:vorb*100, dvmm:dvMine*1e3, vol, mass:rho*vol, beta, b:beta(rho), b1:v.m*dot(U,eT)*1e3/(rho*vol)*1e3, P0};
+}
+function draw(){
+  const s = state, c = calc(s.rho, s.ppost, s.sma, s.dv);
+  document.querySelector("#rhov").textContent = s.rho.toLocaleString("ko-KR")+" kg/m³";
+  document.querySelector("#ppostv").textContent = s.ppost.toFixed(3)+" h";
+  document.querySelector("#smav").textContent = s.sma.toFixed(3)+" km";
+  const rs=[], bs=[], lo=[], hi=[];
+  for (let r=1000;r<=4000;r+=50){ rs.push(r); bs.push(c.beta(r)); }
+  Lab.plot("#plotbeta", {
+    series:[{x:rs,y:bs,color:"var(--ch)",width:2.2},{x:[s.rho],y:[c.b],type:"dots",r:5.5,color:"var(--ch)",opacity:1},{x:[2400],y:[3.61],type:"dots",r:4,color:"#222",opacity:1}],
+    xmin:1000,xmax:4000,ymin:0,ymax:7,
+    bands:[{x0:1500,x1:3300,label:"논문의 밀도 범위"}],
+    hlines:[{y:1,label:"β = 1 · 탐사선이 가져온 운동량만"}],
+    vlines:[{x:s.rho,label:`β ${Lab.fmt(c.b,2)}`}],
+    xlabel:"가정한 디모르포스 밀도 (kg/m³)", ylabel:"운동량 증폭 β   (검은 점: 논문 몬테카를로 3.61)", height:340
+  });
+  document.querySelector("#cap").textContent = `밀도 ${s.rho.toLocaleString("ko-KR")} kg/m³ · 질량 ${(c.mass/1e9).toFixed(2)}×10⁹ kg · β에 쓴 Δv ${s.dv==="paper"?"논문 −2.70":"내 값 "+Lab.fmt(c.dvmm,2)} mm/s.`;
+  let h = "<tr><th>단계</th><th>값</th><th>논문</th></tr>";
+  h += `<tr><td>주기 변화 ΔP</td><td class="num">${Lab.fmt(c.dP,1)} 분</td><td class="num">−33.0±1.0</td></tr>`;
+  h += `<tr><td>공전 속도 v</td><td class="num">${Lab.fmt(c.vcm,1)} cm/s</td><td class="num">—</td></tr>`;
+  h += `<tr><td>속도 변화 Δv</td><td class="num">${Lab.fmt(c.dvmm,2)} mm/s</td><td class="num">−2.70±0.10</td></tr>`;
+  h += `<tr><td>부피 · 질량</td><td class="num">${c.vol.toExponential(3)} m³ · ${c.mass.toExponential(2)} kg</td><td class="num">—</td></tr>`;
+  h += `<tr><td>β = 1이었다면 Δv</td><td class="num">${Lab.fmt(c.b1,2)} mm/s</td><td class="num">—</td></tr>`;
+  h += `<tr><td>β</td><td class="num">${Lab.fmt(c.b,2)}</td><td class="num">3.61 (2,400)</td></tr>`;
+  document.querySelector("#res").innerHTML = h;
+  // 그림자 어긋남
+  const dd=[], mm=[]; const d1=14, step=0.25;
+  for (let d=0; d<=d1+1e-9; d+=step){ dd.push(d); mm.push(d*24/s.ppost*(-c.dP)); }
+  const dots = {x:[], y:[]};
+  for (let n=1;n*s.ppost/24<=d1;n++){ dots.x.push(n*s.ppost/24); dots.y.push(n*(-c.dP)); }
+  Lab.plot("#plotdrift", {series:[{x:dd,y:mm,color:"var(--ch)",width:1.8},{x:dots.x,y:dots.y,type:"dots",r:3,color:"var(--ch)",opacity:1}],
+    xmin:0,xmax:14,ymin:0,ymax:1000, bands:[{x0:1.23,x1:14,label:"지상 광도 관측"}],
+    xlabel:"충돌 뒤 날수", ylabel:"예측보다 앞당겨진 시각(분)", height:300});
+  // 비교(책의 기본 조건으로 고정한 값과 현재 조건의 값)
+  const rows = [
+    {label:"주기 변화(분)", mine:c.dP, expected:-33.0, tol:.05, digits:1},
+    {label:"공전 속도(cm/s)", mine:c.vcm, expected:17.7, tol:.05, digits:1},
+    {label:"Δv(mm/s)", mine:c.dvmm, expected:-2.71, tol:.005, digits:2}];
+  for (const r of [1500,2400,3300]) rows.push({label:`β (밀도 ${r.toLocaleString("ko-KR")})`, mine:c.beta(r), expected:{1500:2.19,2400:3.50,3300:4.81}[r], tol:.005, digits:2});
+  Lab.compare("#cmp", rows);
+}
+function bind(id, key){
+  document.querySelector("#"+id).oninput = e=>{state[key]=+e.target.value; draw();};
+}
+(async()=>{
+  const rows = await Lab.csv("data/dart_published_values.csv");
+  rows.forEach(r=>V[r.symbol]=r.value);
+  bind("rho","rho"); bind("ppost","ppost"); bind("sma","sma");
+  document.querySelectorAll("#dvsrc button").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll("#dvsrc button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); state.dv=b.dataset.s; draw();
+  });
+  document.querySelector("#reset").onclick=()=>{
+    Object.assign(state,DEF,{dv:"paper"});
+    for (const k of ["rho","ppost","sma"]) document.querySelector("#"+k).value=DEF[k];
+    document.querySelectorAll("#dvsrc button").forEach((x,i)=>x.classList.toggle("on",i===0)); draw();
+  };
+  draw();
+  document.querySelector("#hashes").textContent = "dart_published_values.csv " + await sha8("data/dart_published_values.csv");
+  Lab.notebook("#note", "lab03", Lab.NOTE("밀도가 얼마일 때 β가 3이 되는가? 밀도를 어떻게 잡아도 β는 2보다 큰가?"));
+})();
+</script>
+</body>
+</html>

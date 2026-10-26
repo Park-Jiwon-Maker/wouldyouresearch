@@ -1,0 +1,21 @@
+quantity,symbol,value,unit,uncertainty_1sigma,source
+DART mass at impact,m,579.4,kg,0.7,Cheng et al. 2023 Nature 616:457 Extended Data Table 1 (doi:10.1038/s41586-023-05878-z)
+DART velocity relative to Dimorphos x (EME J2000),U_x,3.57399,km/s,,Cheng et al. 2023 Ext. Data Table 1
+DART velocity relative to Dimorphos y,U_y,-4.64106,km/s,,Cheng et al. 2023 Ext. Data Table 1
+DART velocity relative to Dimorphos z,U_z,-1.85622,km/s,,Cheng et al. 2023 Ext. Data Table 1
+Pre-impact orbit period,P_pre,11.92148,h,0.000044,Cheng et al. 2023 Ext. Data Table 1 (N22+ solution of Thomas et al. 2023)
+Post-impact orbit period,P_post,11.372,h,0.0055,Cheng et al. 2023 Ext. Data Table 1 (N22+ solution of Thomas et al. 2023)
+Pre-impact orbit semimajor axis,a,1.206,km,0.035,Cheng et al. 2023 Ext. Data Table 1
+Dimorphos ellipsoid extent x,B_x,177,m,2 (uniform),Cheng et al. 2023 Ext. Data Table 1 (from Daly et al. 2023)
+Dimorphos ellipsoid extent y,B_y,174,m,4 (uniform),Cheng et al. 2023 Ext. Data Table 1
+Dimorphos ellipsoid extent z,B_z,116,m,2 (uniform),Cheng et al. 2023 Ext. Data Table 1
+Dimorphos bulk density (assumed nominal),rho_B,2400,kg/m3,900 (uniform; 1500-3300),Cheng et al. 2023 Ext. Data Table 1
+Net ejecta momentum direction x,E_x,-0.72410,,15 deg cone,Cheng et al. 2023 Ext. Data Table 1 (RA 138 Dec +13)
+Net ejecta momentum direction y,E_y,0.65198,,,Cheng et al. 2023 Ext. Data Table 1
+Net ejecta momentum direction z,E_z,0.22495,,,Cheng et al. 2023 Ext. Data Table 1
+Dimorphos orbital velocity direction x,eT_x,-0.689282,,,Cheng et al. 2023 Ext. Data Table 1
+Dimorphos orbital velocity direction y,eT_y,0.716645,,,Cheng et al. 2023 Ext. Data Table 1
+Dimorphos orbital velocity direction z,eT_z,0.106350,,,Cheng et al. 2023 Ext. Data Table 1
+Published period change,dP,-33.0,min,1.0 (3 sigma),Thomas et al. 2023 Nature 616:448 (doi:10.1038/s41586-023-05805-2)
+Published along-track velocity change,dv_T,-2.70,mm/s,0.10,Cheng et al. 2023
+Published beta at rho=2400,beta,3.61,,+0.19/-0.25,Cheng et al. 2023

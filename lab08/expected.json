@@ -1,0 +1,29 @@
+{
+ "lab": "06",
+ "title": "두 관측소의 떨림 겹쳐 보기",
+ "book_pages": "8장 직접 해보기",
+ "conditions": {
+  "gw": "GW150914 그림 1 파형, 비교 구간 0.30–0.45 s, L 시각마다 H를 선형 보간, 파일 밖은 끝값",
+  "paper": "H를 6.9 ms 앞당기고 부호 반전",
+  "best_shift_scan": "-15–+15 ms, 0.2 ms 간격, 부호 반전",
+  "pta": "NANOGrav 15년 교육용 요약, HD 열, 값/오차"
+ },
+ "r_paper": 0.758,
+ "r_flip_only": -0.31,
+ "r_nothing": 0.31,
+ "r_wide": 0.708,
+ "best_shift_ms": 7.4,
+ "pta_hd": {
+  "p16": 2.31,
+  "median": 2.94,
+  "p84": 3.6
+ },
+ "tolerance": 0.0006,
+ "sha256_8": {
+  "fig1-observed-H.txt": "3ce54751",
+  "fig1-observed-L.txt": "dc413025",
+  "pta_summary_ratios.csv": "6decad71"
+ },
+ "summary": "논문 조건에서 r=0.758. 부호 반전만 −0.31(책), 이동·반전 모두 없으면 +0.31. 구간을 0.25–0.46 s로 넓히면 0.708. 상관 최대는 7.4 ms. HD 열 값/오차의 중앙값 2.94(16–84: 2.31–3.60)는 검출 시그마가 아니다.",
+ "tolerance_2digit": 0.005
+}

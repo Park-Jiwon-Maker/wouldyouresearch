@@ -1,0 +1,24 @@
+id,label_ko,layer,corpus,2021,2022,2023,2024,2025,ytd2026
+early_galaxy,초기 은하·우주 새벽,question,science19,105,112,146,165,196,147
+lrd,작은 붉은 점,question,science19,0,0,1,15,67,96
+reionization,우주 재이온화,question,science19,103,122,123,133,147,110
+dark_energy,암흑에너지,question,science19,315,333,307,413,475,434
+hubble_tension,허블 긴장,question,science19,39,39,50,60,70,57
+gravitational_wave,중력파,question,science19,757,668,790,962,994,791
+pta,펄서 타이밍 배열,question,science19,63,45,101,141,109,79
+frb,빠른 전파폭발,question,science19,98,96,122,106,157,98
+exoplanet_atmosphere,외계행성 대기·투과분광,question,science19,50,60,60,61,67,59
+biosignature,생명징후·거주가능성,question,science19,103,103,100,111,146,129
+disk,원시행성계 원반,question,science19,137,124,108,147,172,102
+astrochemistry,우주화학·복잡한 유기분자,question,science19,30,25,26,20,28,10
+dark_matter,암흑물질,question,science19,892,822,977,1050,1201,1004
+sample_asteroid,류구·베누 시료,question,science19,7,18,31,16,16,20
+lunar_samples,달 시료·창어,question,science19,32,40,29,54,67,39
+ocean_worlds,얼음 위성·바다 세계,question,science19,63,77,88,92,99,51
+planetary_defense,행성방어·소행성 충돌 실험,question,science19,6,25,29,44,17,18
+mars,화성,question,science19,709,790,651,704,738,607
+magnetic_reconnection,자기재연결,question,science19,117,91,117,119,145,95
+space_weather_forecast,우주환경 예측,question,science19,34,32,39,38,64,61
+space_biology,우주비행·미세중력 생명 연구,question,science19,252,242,241,270,292,260
+debris,우주잔해·궤도 서비스,engineering,all24,64,79,70,104,99,73
+ai,기계학습·신경망,method,science19,392,443,513,523,656,489

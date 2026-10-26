@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>경보선을 어디에 그을까 · 우주 리서치 실습 01</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&family=Noto+Serif+KR:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>:root{--ch:#D98A3D;--ch-tint:#F9EEE2}
+.report{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--ch-tint);padding:10px 14px;margin:10px 0 0;white-space:pre;overflow-x:auto;line-height:1.6;color:#2A2A2A}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .report{background:rgba(255,255,255,.06);color:var(--text)}}
+.report mark{background:transparent;font-weight:700;border-bottom:2px solid var(--ch);color:inherit}
+.boxes{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--ink);margin-top:12px}
+.boxes div{padding:10px 12px 10px 0;border-bottom:1px solid var(--hair)}
+.boxes b{display:block;font-size:12px;color:var(--grey);font-weight:700}
+.boxes span{font-family:ui-monospace,Menlo,monospace;font-size:20px;color:var(--ink)}
+.boxes .hit span{color:var(--ch)}
+@media (max-width:560px){.boxes{grid-template-columns:repeat(2,1fr)}}
+.ctl .val{min-width:3.2em;display:inline-block}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../index.html">우주 리서치 · 실습</a><span class="chap">1장 태양 폭풍</span></div></header>
+<main class="wrap">
+
+<div class="hero">
+ <div class="kick">직접 해보기 01</div>
+ <h1>경보선을 어디에 그을까</h1>
+ <div class="meta">약 25분 · 브라우저에서 코드 없이 · Python 선택</div>
+ <p class="lede">미국 예보센터가 1998–2024년에 낸 ‘다음 날 플레어 확률’과 실제 기록을 짝지은 표를 연다. X급은 9,804일 치다. 같은 날짜는 실제 달력으로 맞추었고, 대상 날짜의 기록이 없는 경우는 ‘없었다’로 채우지 않고 뺐다. 확률을 말한 예보를 ‘경보를 울릴지 말지’로 바꾸는 순간 무슨 일이 생기는지 경보선을 움직이며 본다.</p>
+</div>
+
+<section>
+ <h2><span class="n">1</span>출처부터 확인한다</h2>
+ <p class="sub">그래프보다 먼저 읽어야 할 것: 이 확률은 누가, 언제, 어느 날에 대해 말한 것인가.</p>
+ <table class="prov">
+  <tr><td>자료</td><td>Camporeale, E. (2025). NOAA SWPC 플레어 확률 예보와 관측 기록 검증용 자료. Zenodo <a href="https://doi.org/10.5281/zenodo.16620803">doi:10.5281/zenodo.16620803</a> · CC BY 4.0</td></tr>
+  <tr><td>무엇을 쟀나</td><td>미국 해양대기청(NOAA) 우주환경예보센터가 날마다 낸 M급·X급 플레어 확률(첫째·둘째·셋째 날)과, 그 날 실제로 그 급수 이상의 플레어가 있었는지(1/0).</td></tr>
+  <tr><td>이 페이지의 처리</td><td>원 표(10,338행)에서 발행일 1998–2024년을 골라 날짜별로 풀어 58,814개의 (예보, 결과) 짝을 만들었다. 대상 날짜는 실제 달력으로 맞추고, 그 날의 기록이 없는 짝은 뺐다(‘없었다’로 채우지 않음). 브라우저가 느려지지 않게 (급수, 며칠 뒤, 발행 연도, 확률) 조합별 날짜 수와 발생 수를 센 표(forecast_counts.csv)를 함께 두었다.</td></tr>
+  <tr><td>파일 지문</td><td class="mono" id="hashes">—</td></tr>
+ </table>
+ <p class="sub" style="margin-top:18px">책 1장 첫째 단계의 원 보고서(2024년 5월 10일 22시 세계시)에서 사건 확률 대목이다. 쉼표 없이 슬래시로 쓴 세 숫자가 각각 어느 날을 말하는지 읽어 보자.</p>
+ <div class="report" id="report">불러오는 중…</div>
+ <p class="note">자료 출처: NOAA/SWPC, 공개 문서(주소는 data/provenance.json).</p>
+</section>
+
+<section>
+ <h2><span class="n">2</span>예보를 직접 본다</h2>
+ <p class="sub">급수, 몇 일 뒤, 기간, 경보선을 바꿔 본다. 책의 기본 조건은 X급 · 다음 날 · 전체 기간 · 50%다.</p>
+ <div class="controls">
+  <div class="ctl"><label>급수</label><div class="seg" id="kind"><button data-v="M">M급</button><button data-v="X" class="on">X급</button></div></div>
+  <div class="ctl"><label>몇 일 뒤</label><div class="seg" id="lead"><button data-v="1" class="on">다음 날</button><button data-v="2">이틀 뒤</button><button data-v="3">사흘 뒤</button></div></div>
+  <div class="ctl"><label>기간(발행일)</label><div class="seg" id="period"><button data-v="all" class="on">1998–2024</button><button data-v="early">1998–2008</button><button data-v="middle">2009–2019</button><button data-v="recent">2020–2024</button></div></div>
+  <div class="ctl"><label>교정 곡선 묶음 폭</label><div class="seg" id="width"><button data-v="10" class="on">10%p</button><button data-v="20">20%p</button></div></div>
+  <div class="ctl"><label for="th">경보선 <span class="val" id="thv">50%</span></label><input type="range" id="th" min="1" max="99" step="1" value="50"></div>
+ </div>
+
+ <h3 style="margin:6px 0 4px;font-size:15px">교정 곡선 — 말한 확률과 실제로 일어난 비율</h3>
+ <div class="plot" id="rel"></div>
+ <p class="caption" id="relcap"></p>
+
+ <h3 style="margin:22px 0 4px;font-size:15px">경보선을 움직이면 — 세 칸의 날짜 수</h3>
+ <div class="plot" id="thp"></div>
+ <p class="caption" id="thcap"></p>
+
+ <div class="boxes" id="boxes"></div>
+ <table class="res" id="stats"></table>
+</section>
+
+<section>
+ <h2><span class="n">3</span>해 볼 일</h2>
+ <ol class="steps">
+  <li><span><b>원 보고서부터 읽는다.</b> 2024년 5월 10일 22시(세계시) 보고서에서 X급 확률 75/75/75를 찾는다. 각 숫자의 대상 날짜는 언제인가? 셋째 숫자는 사흘을 합한 확률인가?</span></li>
+  <li><span><b>두 곡선을 비교한다.</b> 급수를 M급과 X급으로 번갈아 본다. 점선(말한 대로)에서 어느 쪽으로 벗어나는가? 원이 작은 점은 왜 덜 믿어야 할까?</span></li>
+  <li><span><b>정답률의 함정을 계산한다.</b> X급이 일어난 날은 9,804일 중 몇 날인가? 날마다 ‘없음’이라고만 말하면 정답률은 몇 퍼센트인가? (아래 표의 ‘늘 없음’ 정답률)</span></li>
+  <li><span><b>경보선을 50%에 긋는다.</b> X급 확률이 50퍼센트 이상인 날만 경보를 울린다. 맞힌 날, 괜히 울린 날, 놓친 날, 조용히 맞힌 날을 센다.</span></li>
+  <li><span><b>경보선을 10%로 내린다.</b> 네 칸은 어떻게 바뀌는가? 우주비행사의 선외 활동을 정하는 사람이라면 어느 선을 고르겠는가? 위성 운영자라면?</span></li>
+ </ol>
+</section>
+
+<section>
+ <h2><span class="n">4</span>예상 결과와 비교한다</h2>
+ <p class="sub">책 1장 오른쪽 쪽의 숫자다. 급수·기간 등을 바꿨다면 값이 달라지는 것이 정상이다. 무엇이 달라졌는지가 이 실습의 핵심이다. 아래 비교는 경보선 50%와 10%를 고정해 계산하므로 슬라이더 위치와 무관하다.</p>
+ <div class="expect">
+  <h3>경보선을 50%에서 10%로 내리면 놓친 날은 233일에서 55일로 줄고, 괜히 울린 날은 31일에서 1,598일로 는다</h3>
+  <div id="cmp"></div>
+  <p class="note">비교 조건: X급 · 다음 날 · 1998–2024년 9,804일. 놓친 날과 괜히 울린 날은 언제나 반대로 움직인다. 두 선이 만나는 30% 근처가 ‘가장 좋은’ 경보선인 것은 아니다. 어느 실수가 더 비싼지에 따라 고르는 선이 달라진다. 또 X급 확률이 50% 이상으로 나온 날은 51일뿐이어서, 높은 경보선은 거의 아무것도 잡지 못한다.</p>
+  <p class="note">같은 표에서 ‘어제 X급이 있었으면 오늘도 있다’는 지속 예보를 계산하면 맞힌 날 54, 괜히 울린 날 199, 놓친 날 199다. 이 비교는 교육용 재계산이며 원 논문의 모든 점수를 재현한 것이 아니다. 실시간 예보나 설비 운영의 판단 근거로 쓸 수 없다.</p>
+ </div>
+ <h3 style="margin-top:22px;font-size:15px">결과가 다르다면</h3>
+ <ul class="note">
+  <li>날짜 수가 조금 다르면 다음 날을 ‘다음 행’으로 잡지 않았는지 확인한다. 표에는 날짜가 빠진 곳이 있다(예: 1999-04-11 다음 행이 04-13).</li>
+  <li>경계값을 확인한다. 경보는 ‘확률이 경보선 이상’일 때 울리도록 정했다. ‘초과’로 바꾸면 50%로 예보한 35일이 빠져 숫자가 달라진다.</li>
+  <li>Python 결과가 화면과 다르면 파일 지문(SHA256)부터 비교한다.</li>
+ </ul>
+</section>
+
+<section>
+ <h2><span class="n">5</span>같은 계산을 코드로</h2>
+ <p class="sub">표준 라이브러리만 쓰므로 Python 3만 있으면 된다. 코드는 58,814행 원표를 직접 읽는다.</p>
+<pre>python3 analysis.py                                 # X급 · 다음 날 · 전체 기간 · 경보선 50%
+python3 analysis.py --check                         # 책의 예상 결과와 비교
+python3 analysis.py --threshold 0.1                 # 경보선을 10%로
+python3 analysis.py --kind M --lead 2 --period recent --width 20</pre>
+ <div class="files">
+  <a href="analysis.py" download><b>analysis.py</b><span>같은 계산 · 표준 라이브러리</span></a>
+  <a href="notebook.ipynb" download><b>notebook.ipynb</b><span>그림과 함께 따라 하기</span></a>
+  <a href="expected.json" download><b>expected.json</b><span>책의 예상 결과</span></a>
+  <a href="data/forecast_pairs.csv" download><b>data/forecast_pairs.csv</b><span>예보-결과 짝 · 58,814행 · 2.0MB</span></a>
+  <a href="data/forecast_counts.csv" download><b>data/forecast_counts.csv</b><span>브라우저용 집계 · 1,669행</span></a>
+  <a href="data/persistence_counts.csv" download><b>data/persistence_counts.csv</b><span>지속 예보 네 칸 · 연도별</span></a>
+  <a href="data/20240510RSGA.txt" download><b>data/20240510RSGA.txt</b><span>2024-05-10 원 보고서</span></a>
+  <a href="data/provenance.json" download><b>data/provenance.json</b><span>출처·처리 기록</span></a>
+ </div>
+</section>
+
+<section>
+ <h2><span class="n">6</span>연구 노트</h2>
+ <p class="sub">질문은 좁게, 선택과 결과는 따로. 다른 사람이 똑같이 다시 할 수 있게 적는다.</p>
+ <div id="note"></div>
+</section>
+
+<section>
+ <h2>다음 걸음</h2>
+ <p>기간을 2020–2024년으로 좁혀 같은 계산을 해 보자. 무엇이 달라졌는지 적되, 그 차이를 곧바로 예보 기술의 발전으로 단정하지는 말자. 자료, 조건, 결과를 함께 기록하면 다른 사람이 같은 계산을 다시 할 수 있다.</p>
+</section>
+</main>
+<footer><div class="wrap">《우주 리서치》 1장 「태양 폭풍」의 실습 · 자료 이용 조건은 각 출처를 따른다.</div></footer>
+
+<script src="../assets/lab.js"></script>
+<script>
+const PERIODS = {all:[1998,2024], early:[1998,2008], middle:[2009,2019], recent:[2020,2024]};
+const state = {kind:"X", lead:1, period:"all", width:10, th:50};
+let counts = [], pers = [];
+
+async function sha8(url){
+  const buf = await (await fetch(url)).arrayBuffer();
+  if (!crypto.subtle) return "—";
+  const h = await crypto.subtle.digest("SHA-256", buf);
+  return [...new Uint8Array(h)].slice(0,4).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+// 선택한 급수·며칠 뒤·기간에서 확률(%)별 날짜 수와 발생 수
+function tally(kind, lead, period){
+  const [lo, hi] = PERIODS[period];
+  const n = new Array(101).fill(0), e = new Array(101).fill(0);
+  for (const r of counts) if (r.kind===kind && r.lead===lead && r.year>=lo && r.year<=hi){ n[r.pct]+=r.n; e[r.pct]+=r.events; }
+  return {n, e};
+}
+// 경보선 t(%) 이상: 맞힌/괜히 울린/놓친/조용히 맞힌
+function boxes(T, t){
+  let tp=0, al=0, N=0, E=0;
+  for (let p=0;p<=100;p++){ N+=T.n[p]; E+=T.e[p]; if (p>=t){ tp+=T.e[p]; al+=T.n[p]; } }
+  return {hit:tp, fa:al-tp, miss:E-tp, quiet:N-al-(E-tp), n:N, events:E, atOrAbove:al};
+}
+function persBox(kind, period){
+  const [lo, hi] = PERIODS[period], b = {hit:0, fa:0, miss:0, quiet:0};
+  for (const r of pers) if (r.kind===kind && r.year>=lo && r.year<=hi){ b.hit+=r.tp; b.fa+=r.fp; b.miss+=r.fn; b.quiet+=r.tn; }
+  b.n = b.hit+b.fa+b.miss+b.quiet; return b;
+}
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+function draw(){
+  const T = tally(state.kind, state.lead, state.period);
+  const bx = boxes(T, state.th);
+  const label = `${state.kind}급 · ${{1:"다음 날",2:"이틀 뒤",3:"사흘 뒤"}[state.lead]} · ${PERIODS[state.period].join("–")}년`;
+  const ch = css("--ch") || "#D98A3D", ink = css("--ink") || "#222";
+
+  // 교정 곡선
+  const w = state.width, bins = [];
+  for (let lo=0; lo<100; lo+=w){
+    let n=0, e=0, sp=0;
+    for (let p=0;p<=100;p++) if (Math.min(100-w, Math.floor(p/w)*w)===lo){ n+=T.n[p]; e+=T.e[p]; sp+=T.n[p]*p/100; }
+    if (n) bins.push({lo, n, mean:sp/n, rate:e/n});
+  }
+  const ser = [{x:[0,1], y:[0,1], color:css("--grey")||"#888", dash:"5 4", width:1.2}];
+  ser.push({x:bins.map(b=>b.mean), y:bins.map(b=>b.rate), color:ch, width:1.6});
+  bins.forEach(b=>ser.push({x:[b.mean], y:[b.rate], type:"dots", color:ch, r:Math.max(3, Math.min(14, 2.2+Math.sqrt(b.n)/4.5)), opacity:.8}));
+  Lab.plot("#rel", {series:ser, xmin:0, xmax:1, ymin:0, ymax:1, xticks:5,
+    xfmt:v=>Math.round(v*100)+"%", yfmt:v=>Math.round(v*100)+"%",
+    xlabel:"예보한 확률(묶음 평균)", ylabel:"실제로 일어난 날의 비율", height:360,
+    vlines:[{x:state.th/100, label:"경보선", color:ink, dash:"3 3"}]});
+  document.querySelector("#relcap").textContent =
+    `${label}. 원의 크기는 그 묶음의 날짜 수(작을수록 덜 믿는다). 가장 작은 원: ${Math.min(...bins.map(b=>b.n)).toLocaleString("ko-KR")}일, 가장 큰 원: ${Math.max(...bins.map(b=>b.n)).toLocaleString("ko-KR")}일. 점선은 ‘말한 대로’.`;
+
+  // 경보선 곡선 (로그 눈금: 0은 그릴 수 없어 뺀다)
+  const xs = [], hit=[], fa=[], miss=[];
+  for (let t=1;t<=99;t++){ const b = boxes(T,t); xs.push(t); hit.push(b.hit); fa.push(b.fa); miss.push(b.miss); }
+  const part = a => { const x=[], y=[]; a.forEach((v,i)=>{ if (v>0){ x.push(xs[i]); y.push(v); } }); return {x,y}; };
+  const mk = (a, color, name) => ({...part(a), color, width:1.8, label:name});
+  const maxv = Math.max(...fa, ...miss, ...hit, 10);
+  Lab.plot("#thp", {series:[mk(fa,ch,"괜히 울린 날"), mk(miss,ink,"놓친 날"), mk(hit,css("--grey")||"#888","맞힌 날")],
+    xmin:0, xmax:100, ymin:1, ymax:Math.pow(10, Math.ceil(Math.log10(maxv))), logy:true, xticks:10, xfmt:v=>v+"%", yfmt:v=>v.toLocaleString("ko-KR"),
+    xlabel:"경보선(이 확률 이상이면 “온다”고 말한다)", ylabel:"날짜 수(10배마다 한 칸)", height:340,
+    bands:[{x0:9.5,x1:10.5},{x0:49.5,x1:50.5}],
+    vlines:[{x:state.th, color:ink, dash:"3 3"}]});
+  document.querySelector("#thcap").textContent = `${label}. 세로는 날짜 수(로그 눈금), 0일인 경보선은 그리지 않았다. 검은 점선이 지금 고른 경보선이다.`;
+
+  // 네 칸 + 지표
+  const f = v => v.toLocaleString("ko-KR");
+  document.querySelector("#boxes").innerHTML =
+    `<div class="hit"><b>맞힌 날</b><span>${f(bx.hit)}</span></div><div><b>괜히 울린 날</b><span>${f(bx.fa)}</span></div><div><b>놓친 날</b><span>${f(bx.miss)}</span></div><div><b>조용히 맞힌 날</b><span>${f(bx.quiet)}</span></div>`;
+  let brier = 0;
+  for (let p=0;p<=100;p++){ const q=p/100; brier += T.e[p]*(1-q)*(1-q) + (T.n[p]-T.e[p])*q*q; }
+  brier /= bx.n;
+  const pb = persBox(state.kind, state.period);
+  const pct = v => isNaN(v)||!isFinite(v) ? "—" : Lab.fmt(v*100,1)+"%";
+  document.querySelector("#stats").innerHTML =
+    `<tr><th>항목</th><th>값</th><th>읽는 법</th></tr>` +
+    `<tr><td>${label}</td><td class="num">${f(bx.n)}일</td><td>실제 발생 ${f(bx.events)}일</td></tr>` +
+    `<tr><td>늘 ‘없음’이라고 말하면 정답률</td><td class="num">${pct((bx.n-bx.events)/bx.n)}</td><td>그래도 발생한 ${f(bx.events)}일은 모두 놓친다</td></tr>` +
+    `<tr><td>경보선 ${state.th}% 이상으로 예보한 날</td><td class="num">${f(bx.atOrAbove)}일</td><td>이 중 실제 발생 ${f(bx.hit)}일</td></tr>` +
+    `<tr><td>잡아낸 비율(맞힌 ÷ 발생)</td><td class="num">${pct(bx.hit/bx.events)}</td><td>높일수록 놓친 날이 준다</td></tr>` +
+    `<tr><td>경보 중 헛경보 비율(괜히 ÷ 경보)</td><td class="num">${pct(bx.fa/bx.atOrAbove)}</td><td>경보가 0일이면 정의되지 않는다</td></tr>` +
+    `<tr><td>브라이어 점수</td><td class="num">${Lab.fmt(brier,4)}</td><td>작을수록 좋다. 같은 자료끼리만 비교</td></tr>` +
+    `<tr><td>지속 예보(어제 있었으면 오늘도)</td><td class="num">${f(pb.hit)} / ${f(pb.fa)} / ${f(pb.miss)}</td><td>맞힌 / 괜히 울린 / 놓친 날, ${state.kind}급 · ${PERIODS[state.period].join("–")}년 · 다음 날 기준(${f(pb.n)}일)</td></tr>`;
+
+  // 책 조건 비교: 급수·며칠 뒤·기간은 조작판, 경보선은 50%와 10%로 고정
+  const b50 = boxes(T,50), b10 = boxes(T,10);
+  Lab.compare("#cmp", [
+    {label:"짝의 수(일)", mine:b50.n, expected:9804, digits:0, tol:0},
+    {label:"X급 발생일", mine:b50.events, expected:253, digits:0, tol:0},
+    {label:"늘 ‘없음’ 정답률", mine:(b50.n-b50.events)/b50.n*100, expected:97.4, digits:1, unit:"%", tol:.05},
+    {label:"확률 50% 이상으로 나온 날", mine:b50.atOrAbove, expected:51, digits:0, tol:0},
+    {label:"경보선 50% · 맞힌 날", mine:b50.hit, expected:20, digits:0, tol:0},
+    {label:"경보선 50% · 괜히 울린 날", mine:b50.fa, expected:31, digits:0, tol:0},
+    {label:"경보선 50% · 놓친 날", mine:b50.miss, expected:233, digits:0, tol:0},
+    {label:"경보선 50% · 조용히 맞힌 날", mine:b50.quiet, expected:9520, digits:0, tol:0},
+    {label:"경보선 10% · 맞힌 날", mine:b10.hit, expected:198, digits:0, tol:0},
+    {label:"경보선 10% · 괜히 울린 날", mine:b10.fa, expected:1598, digits:0, tol:0},
+    {label:"경보선 10% · 놓친 날", mine:b10.miss, expected:55, digits:0, tol:0},
+    {label:"경보선 10% · 조용히 맞힌 날", mine:b10.quiet, expected:7953, digits:0, tol:0},
+    {label:"지속 예보 · 맞힌 날", mine:pb.hit, expected:54, digits:0, tol:0},
+    {label:"지속 예보 · 괜히 울린 날", mine:pb.fa, expected:199, digits:0, tol:0},
+    {label:"지속 예보 · 놓친 날", mine:pb.miss, expected:199, digits:0, tol:0},
+  ]);
+}
+function seg(id, fn){
+  document.querySelectorAll(`#${id} button`).forEach(b=>b.onclick=()=>{
+    document.querySelectorAll(`#${id} button`).forEach(x=>x.classList.remove("on")); b.classList.add("on"); fn(b.dataset.v); draw();
+  });
+}
+(async()=>{
+  [counts, pers] = await Promise.all([Lab.csv("data/forecast_counts.csv"), Lab.csv("data/persistence_counts.csv")]);
+  seg("kind", v=>state.kind=v);
+  seg("lead", v=>state.lead=+v);
+  seg("period", v=>state.period=v);
+  seg("width", v=>state.width=+v);
+  const th = document.querySelector("#th");
+  th.oninput = ()=>{ state.th=+th.value; document.querySelector("#thv").textContent=state.th+"%"; draw(); };
+  draw();
+  try {
+    const t = await (await fetch("data/20240510RSGA.txt")).text(), L = t.split("\n");
+    const i = L.findIndex(l=>l.startsWith("III.")), seg_ = L.slice(i-0, i+5).map(l=>l.replace(/&/g,"&amp;").replace(/</g,"&lt;"));
+    const head = L.filter(l=>l.startsWith(":Issued")).join("");
+    seg_[2] = `<mark>${seg_[2]}</mark>`;
+    document.querySelector("#report").innerHTML = head + "\n…\n" + seg_.join("\n");
+  } catch(e){ document.querySelector("#report").textContent = "보고서를 불러오지 못했다. data/20240510RSGA.txt 를 직접 연다."; }
+  const files = ["forecast_pairs.csv","forecast_counts.csv","persistence_counts.csv"];
+  const hs = await Promise.all(files.map(f=>sha8(`data/${f}`)));
+  document.querySelector("#hashes").textContent = files.map((f,i)=>`${f} ${hs[i]}`).join(" · ");
+  Lab.notebook("#note", "lab01", Lab.NOTE("경보선을 50%에서 10%로 내리면 네 칸은 어떻게 바뀌는가? 내가 운영자라면 어느 실수가 더 비싼가?"));
+})();
+</script>
+</body>
+</html>
